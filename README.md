@@ -1,1 +1,1 @@
-# GDT
+# Khmer Word Checker
