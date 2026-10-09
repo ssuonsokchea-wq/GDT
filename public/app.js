@@ -78,6 +78,7 @@ function visibleFindings() {
   return [...state.findings, ...state.aiFindings]
     .filter(f => !state.rejected.has(keyOf(f)))
     .filter(f => state.showUnverified || f.category !== 'unverified')
+    .filter(f => !state.onlyFixable || f.suggestions.length)
     .filter(f => f.confidence >= state.minConf || f.category === 'unverified')
     .sort((a, b) => a.start - b.start);
 }
@@ -176,6 +177,10 @@ function card(f) {
   if (state.server.ai && ['clarity', 'unnecessary', 'wording', 'structure', 'repetition'].includes(f.category)) {
     actions.append(el('button', { type: 'button', class: 'ghost', onclick: ev => { ev.stopPropagation(); rephrase(...sentenceRange(f.start)); } }, '✦ សរសេរឡើងវិញ'));
   }
+  if (!f.suggestions.length) {
+    // Advice without an automatic replacement: let the writer jump to the passage and fix it.
+    actions.append(el('button', { type: 'button', onclick: ev => { ev.stopPropagation(); select(f, true); toast('បានជ្រើសអត្ថបទ។ សូមកែដោយខ្លួនឯង រួចពិនិត្យម្ដងទៀត។'); } }, '✎ កែក្នុងអត្ថបទ'));
+  }
   actions.append(el('button', { type: 'button', class: 'ghost', onclick: ev => { ev.stopPropagation(); reject(f); } }, '✕ បដិសេធ'));
   if (f.category === 'spelling' || f.category === 'unverified') {
     actions.append(el('button', { type: 'button', class: 'ghost', title: 'បន្ថែមពាក្យនេះទៅសទ្ទានុក្រមផ្ទាល់ខ្លួន', onclick: ev => { ev.stopPropagation(); addUserWord(f.original); } }, '+ សទ្ទានុក្រម'));
@@ -190,7 +195,9 @@ function card(f) {
     el('span', { class: 'conf', title: 'កម្រិតទំនុកចិត្តរបស់វិធាន (មិនមែនប្រូបាប៊ីលីតេដែលបានវាស់)' },
       `ទំនុកចិត្ត ${CONFIDENCE_KM[f.confidenceLevel]} ${toKhmerDigits(pct)}%`,
       el('span', { class: 'conf-bar' }, el('span', { style: null })))),
-  el('h3', {}, f.title), change, el('p', {}, f.explanation),
+  el('h3', {}, f.title), f.suggestions.length ? change : el('div', { class: 'change', lang: 'km' }, show(f.original)),
+  !f.suggestions.length ? el('p', { class: 'advice' }, 'ការណែនាំ៖ មិនមានពាក្យជំនួសស្វ័យប្រវត្តិទេ។ ចុច «✎ កែក្នុងអត្ថបទ» ដើម្បីកែដោយខ្លួនឯង។') : null,
+  el('p', {}, f.explanation),
   f.legalNote ? el('p', { class: 'legal-note' }, f.legalNote) : null,
   el('p', { class: 'src' }, `ទីតាំង៖ កថាខណ្ឌ ${toKhmerDigits(f.location?.paragraph ?? '')} · បន្ទាត់ ${toKhmerDigits(f.location?.line ?? '')}`),
   src, actions);
@@ -541,6 +548,8 @@ function init() {
   document.querySelectorAll('[data-export]').forEach(b => { b.onclick = () => exportAs(b.dataset.export); });
   $('confFilter').onchange = e => { state.minConf = Number(e.target.value); render(); };
   $('showUnverified').onchange = e => { state.showUnverified = e.target.checked; render(); };
+  $('onlyFixable').onchange = e => { state.onlyFixable = e.target.checked; store.set('onlyFixable', e.target.checked); render(); };
+  state.onlyFixable = $('onlyFixable').checked = store.get('onlyFixable', false);
   $('settingsBtn').onclick = openSettings;
   $('ncklFile').onchange = e => { if (e.target.files[0]) importNckl(e.target.files[0]); };
   $('consentCheck').onchange = e => { $('consentOk').disabled = !e.target.checked; };
