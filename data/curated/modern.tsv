@@ -1,0 +1,158 @@
+# word	English gloss	domain	POS (N or V)
+# Project-curated contemporary vocabulary that post-dates the 1967 Chuon Nath dictionary
+# or is spelled in its current form. NOT an official list: replace or confirm entries with
+# terms approved by the National Council of Khmer Language (data/curated/nckl.tsv).
+កុំព្យូទ័រ	computer	technology	N
+អ៊ីនធឺណិត	internet	technology	N
+អ៊ីមែល	email	technology	N
+គេហទំព័រ	website	technology	N
+បណ្ដាញសង្គម	social network	technology	N
+ទូរស័ព្ទដៃ	mobile phone	technology	N
+ទូរស័ព្ទ	telephone	technology	N
+ស្មាតហ្វូន	smartphone	technology	N
+កម្មវិធី	program, application	technology	N
+ឯកសារ	document	general	N
+ទិន្នន័យ	data	technology	N
+មូលដ្ឋានទិន្នន័យ	database	technology	N
+បច្ចេកវិទ្យា	technology	technology	N
+ព័ត៌មានវិទ្យា	information technology	technology	N
+ឌីជីថល	digital	technology	N
+អេឡិចត្រូនិក	electronic	technology	N
+ពាក្យសម្ងាត់	password	technology	N
+សុវត្ថិភាព	safety, security	general	N
+សន្តិសុខ	security	general	N
+បញ្ញាសិប្បនិម្មិត	artificial intelligence	technology	N
+ម៉ាស៊ីន	machine	technology	N
+ម៉ាស៊ីនបោះពុម្ព	printer	technology	N
+វីដេអូ	video	technology	N
+ទស្សនាវដ្ដី	magazine	media	N
+កាសែត	newspaper	media	N
+ទូរទស្សន៍	television	media	N
+វិទ្យុ	radio	media	N
+អ្នកសារព័ត៌មាន	journalist	media	N
+សេដ្ឋកិច្ច	economy	economy	N
+ពាណិជ្ជកម្ម	commerce	economy	N
+ឧស្សាហកម្ម	industry	economy	N
+កសិកម្ម	agriculture	economy	N
+ទេសចរណ៍	tourism	economy	N
+វិនិយោគ	investment	economy	V
+វិនិយោគិន	investor	economy	N
+ធនាគារ	bank	economy	N
+ប្រាក់កម្ចី	loan	economy	N
+អត្រាការប្រាក់	interest rate	economy	N
+ពន្ធដារ	taxation	economy	N
+ពន្ធ	tax	economy	N
+អតិថិជន	customer	economy	N
+ក្រុមហ៊ុន	company	economy	N
+សហគ្រាស	enterprise	economy	N
+ផលិតផល	product	economy	N
+សេវាកម្ម	service	economy	N
+ទីផ្សារ	market	economy	N
+ថវិកា	budget	economy	N
+ចំណូល	revenue	economy	N
+ចំណាយ	expenditure	economy	N
+អប់រំ	educate	education	V
+ការអប់រំ	education	education	N
+សាកលវិទ្យាល័យ	university	education	N
+វិទ្យាល័យ	high school	education	N
+អនុវិទ្យាល័យ	lower secondary school	education	N
+បឋមសិក្សា	primary education	education	N
+សញ្ញាប័ត្រ	diploma, certificate	education	N
+និស្សិត	university student	education	N
+សាស្ត្រាចារ្យ	professor	education	N
+ស្រាវជ្រាវ	research	education	V
+ការស្រាវជ្រាវ	research (noun)	education	N
+និក្ខេបបទ	thesis	education	N
+សិក្ខាសាលា	workshop, seminar	education	N
+វគ្គបណ្ដុះបណ្ដាល	training course	education	N
+សុខាភិបាល	public health	health	N
+សុខភាព	health	health	N
+មន្ទីរពេទ្យ	hospital	health	N
+វេជ្ជបណ្ឌិត	medical doctor	health	N
+គិលានុបដ្ឋាក	nurse	health	N
+ថ្នាំបង្ការ	vaccine	health	N
+ជំងឺ	disease	health	N
+បរិស្ថាន	environment	environment	N
+ការប្រែប្រួលអាកាសធាតុ	climate change	environment	N
+អាកាសធាតុ	climate, weather	environment	N
+ថាមពល	energy	environment	N
+អគ្គិសនី	electricity	environment	N
+ហេដ្ឋារចនាសម្ព័ន្ធ	infrastructure	development	N
+អភិវឌ្ឍន៍	development	development	N
+អភិវឌ្ឍ	develop	development	V
+ប្រជាធិបតេយ្យ	democracy	politics	N
+សិទ្ធិមនុស្ស	human rights	politics	N
+ការបោះឆ្នោត	election	politics	N
+គណបក្ស	political party	politics	N
+រដ្ឋសភា	National Assembly	government	N
+ព្រឹទ្ធសភា	Senate	government	N
+រដ្ឋាភិបាល	government	government	N
+ក្រសួង	ministry	government	N
+រដ្ឋមន្ត្រី	minister	government	N
+នាយករដ្ឋមន្ត្រី	prime minister	government	N
+រដ្ឋលេខាធិការ	secretary of state	government	N
+អនុរដ្ឋលេខាធិការ	under-secretary of state	government	N
+អគ្គនាយកដ្ឋាន	general department	government	N
+នាយកដ្ឋាន	department	government	N
+មន្ទីរ	provincial department	government	N
+ការិយាល័យ	office	government	N
+មន្ត្រីរាជការ	civil servant	government	N
+រាជរដ្ឋាភិបាល	Royal Government	government	N
+ទីស្ដីការគណៈរដ្ឋមន្ត្រី	Office of the Council of Ministers	government	N
+គណៈរដ្ឋមន្ត្រី	Council of Ministers	government	N
+រដ្ឋបាល	administration	government	N
+រដ្ឋបាលថ្នាក់ក្រោមជាតិ	sub-national administration	government	N
+គោលនយោបាយ	policy	government	N
+យុទ្ធសាស្ត្រ	strategy	government	N
+ផែនការ	plan	government	N
+គម្រោង	project	government	N
+កម្មវិធី	programme	government	N
+របាយការណ៍	report	administration	N
+កំណត់ហេតុ	minutes, record	administration	N
+លិខិត	letter	administration	N
+លិខិតបញ្ជាក់	certificate letter	administration	N
+ពាក្យស្នើសុំ	application	administration	N
+សំណើ	proposal, request	administration	N
+សេចក្ដីជូនដំណឹង	notification	administration	N
+សេចក្ដីណែនាំ	instruction, guideline	administration	N
+សេចក្ដីសម្រេច	decision	administration	N
+កិច្ចប្រជុំ	meeting	administration	N
+របៀបវារៈ	agenda	administration	N
+អង្គភាព	unit, entity	administration	N
+ហត្ថលេខា	signature	administration	N
+ត្រា	seal	administration	N
+កាលបរិច្ឆេទ	date	administration	N
+អាសយដ្ឋាន	address	administration	N
+អត្តសញ្ញាណប័ណ្ណ	identity card	administration	N
+លិខិតឆ្លងដែន	passport	administration	N
+សំបុត្របញ្ជាក់កំណើត	birth certificate	administration	N
+ឯកឧត្ដម	His/Her Excellency	honorific	N
+ឯកឧត្តម	His/Her Excellency	honorific	N
+លោកជំទាវ	Lok Chumteav (honorific)	honorific	N
+សម្ដេច	Samdech (honorific)	honorific	N
+ព្រះករុណា	His Majesty	honorific	N
+ព្រះមហាក្សត្រ	the King	honorific	N
+បញ្ហា	problem, issue	general	N
+ដំណោះស្រាយ	solution	general	N
+គុណភាព	quality	general	N
+ប្រសិទ្ធភាព	effectiveness	general	N
+តម្លាភាព	transparency	general	N
+គណនេយ្យភាព	accountability	general	N
+ការចូលរួម	participation	general	N
+សមត្ថភាព	capacity	general	N
+អ្នកប្រើប្រាស់	user	general	N
+ការប្រើប្រាស់	use	general	N
+ស្ត្រី	woman	general	N
+កុមារ	child	general	N
+យុវជន	youth	general	N
+ពលរដ្ឋ	citizen	general	N
+សហគមន៍	community	general	N
+អង្គការ	organisation	general	N
+អង្គការក្រៅរដ្ឋាភិបាល	non-governmental organisation	general	N
+អន្តរជាតិ	international	general	N
+ថ្នាក់ជាតិ	national level	general	N
+ឥឡូវនេះ	now	general	N
+ព័ត៌មាន	information, news	general	N
+ចំណេះដឹង	knowledge	general	N
+វប្បធម៌	culture	general	N
+ធម្មជាតិ	nature	general	N

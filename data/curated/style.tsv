@@ -1,0 +1,14 @@
+# pattern	replacement	category	modes	confidence	explanation (Khmer)
+# Project-curated verbose or redundant phrasings and contradictory combinations.
+# category: wording (unnecessary words), grammar (contradiction)
+ធ្វើការសិក្សា	សិក្សា	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «សិក្សា» គ្រប់គ្រាន់ ហើយសំណេរខ្លីច្បាស់ជាង។
+ធ្វើការពិនិត្យ	ពិនិត្យ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ពិនិត្យ» គ្រប់គ្រាន់។
+ធ្វើការប្រជុំ	ប្រជុំ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ប្រជុំ» គ្រប់គ្រាន់។
+ធ្វើការស្រាវជ្រាវ	ស្រាវជ្រាវ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ស្រាវជ្រាវ» គ្រប់គ្រាន់។
+ធ្វើការវាយតម្លៃ	វាយតម្លៃ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «វាយតម្លៃ» គ្រប់គ្រាន់។
+ហើយនិង	និង	wording	academic,government,administrative,legal	low	«ហើយនិង» ប្រើពាក្យភ្ជាប់ពីរដែលមានមុខងារដូចគ្នា។ ក្នុងសំណេរផ្លូវការ «និង» តែមួយគ្រប់គ្រាន់។
+ជាងបំផុត	បំផុត	grammar	general,academic,government,administrative,legal	medium	«ជាង» (ប្រៀបធៀប) និង «បំផុត» (កម្រិតខ្ពស់បំផុត) មិនប្រើជាប់គ្នាទេ។ ជ្រើសរើសមួយ៖ «...ជាងគេ» ឬ «...បំផុត»។
+ទាំងអស់ទាំងអស់	ទាំងអស់	wording	general,academic,government,administrative,legal	high	«ទាំងអស់» ត្រូវបានសរសេរដដែលពីរដង។
+បាននឹង	នឹងបាន	grammar	general,academic,government,administrative,legal	low	លំដាប់ពាក្យជំនួយកិរិយា៖ សញ្ញាអនាគត «នឹង» ជាធម្មតានៅមុខ «បាន» (ឧ. «នឹងបានទទួល»)។
+ផងដែល	ផងដែរ	spelling	general,academic,government,administrative,legal	high	ពាក្យបញ្ចប់ «ផងដែរ» ប្រើ «ដែរ» (ដូចគ្នា) មិនមែន «ដែល» (ពាក្យភ្ជាប់) ទេ។
+ដូចគ្នាដែល	ដូចគ្នាដែរ	spelling	general,academic,government,administrative,legal	medium	នៅទីនេះត្រូវការ «ដែរ» (ន័យថា ដូចគ្នា/ផង) មិនមែន «ដែល» ទេ។

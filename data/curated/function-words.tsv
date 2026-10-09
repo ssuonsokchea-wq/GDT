@@ -1,0 +1,129 @@
+# word	POS (comma-separated: N V ADJ ADV PRON PART NUM CLF PREP CONJ INTJ)	note
+# Project-curated grammatical function words. Used for part-of-speech hints in grammar rules.
+ខ្ញុំ	PRON
+ខ្ញុំបាទ	PRON
+នាងខ្ញុំ	PRON
+យើង	PRON
+យើងខ្ញុំ	PRON
+អ្នក	PRON
+អ្នកទាំងអស់គ្នា	PRON
+គាត់	PRON
+គេ	PRON
+ពួកគេ	PRON
+ពួកយើង	PRON
+វា	PRON
+លោក	PRON,N
+លោកស្រី	PRON,N
+នាង	PRON
+ឯង	PRON
+អញ	PRON
+ព្រះអង្គ	PRON
+ទ្រង់	PRON
+នេះ	PRON,PART
+នោះ	PRON,PART
+ទាំងនេះ	PRON
+ទាំងនោះ	PRON
+និង	CONJ	coordinating conjunction "and"
+ឬ	CONJ
+ហើយ	CONJ,PART
+ប៉ុន្តែ	CONJ
+ប៉ុន្ដែ	CONJ
+តែ	CONJ,ADV
+ព្រោះ	CONJ
+ពីព្រោះ	CONJ
+ដោយសារ	CONJ,PREP
+ដោយសារតែ	CONJ
+ដូច្នេះ	CONJ
+ដូច្នោះ	CONJ
+ប្រសិនបើ	CONJ
+បើ	CONJ
+ទោះបី	CONJ
+ទោះបីជា	CONJ
+ទាំង	CONJ,ADV
+ដែល	PART	relative marker "that/which"; also "ever" after មិន
+ដែរ	PART	sentence-final "also/too"
+នឹង	PART,PREP	future marker "will"; preposition "with/to" after certain verbs
+បាន	PART,V
+កំពុង	PART
+ធ្លាប់	PART,V
+ទើប	PART,ADV
+ត្រូវ	PART,V
+អាច	PART,V
+គួរ	PART,V
+ចង់	PART,V
+មិន	PART	negation
+ពុំ	PART	negation (formal)
+កុំ	PART	prohibitive
+គ្មាន	V
+ទេ	PART
+ផង	PART
+ណាស់	ADV
+ពេក	ADV
+បំផុត	ADV
+ជាង	ADV,PREP
+ក៏	PART
+គឺ	V	copula
+ជា	V	copula
+នៅ	PREP,V
+ក្នុង	PREP
+លើ	PREP
+ក្រោម	PREP
+ពី	PREP
+អំពី	PREP
+ចំពោះ	PREP
+សម្រាប់	PREP
+ដល់	PREP,V
+ទៅ	V,PREP
+មក	V,PREP
+របស់	PREP,N
+នៃ	PREP
+នូវ	PREP	object marker
+ដោយ	PREP
+តាម	PREP
+ជាមួយ	PREP
+រវាង	PREP
+ក្រៅពី	PREP
+តើ	PART	question-introducing particle
+អ្វី	PRON
+ណា	PRON
+នរណា	PRON
+អ្នកណា	PRON
+ប៉ុន្មាន	PRON,NUM
+ហេតុអ្វី	PRON
+យ៉ាងដូចម្ដេច	ADV
+ដូចម្ដេច	ADV
+ម្ដេច	ADV
+ទីណា	PRON
+ពេលណា	PRON
+ខ្លះ	PRON,ADV
+មួយ	NUM
+ពីរ	NUM
+បី	NUM
+បួន	NUM
+ប្រាំ	NUM
+ដប់	NUM
+រយ	NUM
+ពាន់	NUM
+ម៉ឺន	NUM
+សែន	NUM
+លាន	NUM
+នាក់	CLF	classifier for people
+អង្គ	CLF,N
+ក្បាល	CLF,N
+គ្រឿង	CLF,N
+ដើម	CLF,N
+ក្បាល	CLF,N
+សន្លឹក	CLF
+ក្បាល	CLF
+ច្បាប់	CLF,N
+ខ្នង	CLF,N
+ដង	CLF,N
+ថ្ងៃ	N
+ខែ	N
+ឆ្នាំ	N
+ម្សិលមិញ	ADV,N
+ស្អែក	ADV,N
+ថ្ងៃស្អែក	ADV,N
+ឥឡូវ	ADV
+ឥឡូវនេះ	ADV
+បច្ចុប្បន្ន	N,ADV

@@ -1,0 +1,13 @@
+node_modules/
+data/sources/cache/
+tests/results/
+test-output/
+public/vendor/
+.env
+.env.*
+!.env.example
+*.log
+# Never commit confidential documents or the scanned textbook
+private/
+textbook/
+*.scan.pdf

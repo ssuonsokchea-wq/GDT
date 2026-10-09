@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="km">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="KhmerProof: a privacy-first Khmer proofreading prototype with highlighted writing issues and downloadable reports.">
+  <title>KhmerProof | ជំនួយការពិនិត្យសំណេរខ្មែរ</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="checker.js"></script>
+  <script defer src="docx.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="KhmerProof home">
+        <span class="logo" aria-hidden="true">ក</span>
+        <span class="brand-name">Khmer<span>Proof</span><small>ឧបករណ៍ពិនិត្យសំណេរខ្មែរ</small></span>
+      </a>
+      <div class="head-controls">
+        <span class="private-pill"><span class="dot"></span> អត្ថបទមិនត្រូវបានផ្ញើទៅម៉ាស៊ីនមេ</span>
+        <a class="help-link" href="README.md" target="_blank" rel="noopener">របៀបប្រើប្រាស់ ↗</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="intro">
+        <div class="intro-copy">
+          <div class="eyebrow">KHMER WRITING LAB · PUBLIC PROTOTYPE</div>
+          <h1>សរសេរភាសាខ្មែរ<br><em>ឱ្យច្បាស់លាស់ និងត្រឹមត្រូវ</em></h1>
+          <p>ពិនិត្យអក្ខរាវិរុទ្ធ កំហុសបច្ចេកទេស សញ្ញាវណ្ណយុត្ត និងចំណុចដែលគួរពិនិត្យឡើងវិញ។ មើលការណែនាំដោយផ្ទាល់ ហើយទាញយករបាយការណ៍ពេញលេញ។</p>
+        </div>
+        <div class="intro-badge" aria-label="Reference priorities"><span class="book-icon">📖</span><b>មូលដ្ឋានយោង</b><small>ជួន ណាត · វេយ្យាករណ៍ · ពាក្យសម័យថ្មី</small></div>
+      </section>
+
+      <section class="workspace" aria-label="Writing checker workspace">
+        <div class="workspace-toolbar">
+          <div class="tab-title"><span class="small-icon">✍</span><strong>កន្លែងកែសម្រួលអត្ថបទ</strong><span class="tag">Live review</span></div>
+          <div class="toolbar-right">
+            <label for="mode" class="input-label">របៀបពិនិត្យ</label>
+            <select id="mode" aria-label="Review mode">
+              <option value="general">ទូទៅ · General</option>
+              <option value="formal">ផ្លូវការ / ច្បាប់ · Formal</option>
+            </select>
+            <button id="sampleBtn" class="text-button" type="button">សាកល្បងឧទាហរណ៍</button>
+          </div>
+        </div>
+
+        <div class="workspace-grid">
+          <div class="writing-panel">
+            <div class="editor-status"><span><span class="status-circle"></span> អ្នកអាចវាយបញ្ចូល ឬបិទភ្ជាប់អត្ថបទបាន</span><span id="charCount">០ តួអក្សរ</span></div>
+            <div class="editor-frame" id="editorFrame">
+              <div id="highlightLayer" class="highlight-layer" aria-hidden="true"></div>
+              <textarea id="editor" spellcheck="false" aria-label="Paste or type Khmer writing" placeholder="សូមសរសេរ ឬបិទភ្ជាប់អត្ថបទជាភាសាខ្មែរនៅទីនេះ..." maxlength="200000"></textarea>
+            </div>
+            <div class="editor-actions">
+              <div class="upload-row">
+                <input id="textFile" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+                <button class="light-button" type="button" id="uploadBtn">↥ បញ្ចូលឯកសារ TXT / DOCX</button>
+                <button class="text-button subtle" type="button" id="clearBtn">លុបអត្ថបទ</button>
+              </div>
+              <button class="primary-button" type="button" id="reviewBtn">ពិនិត្យអត្ថបទ <span aria-hidden="true">➜</span></button>
+            </div>
+            <p class="editor-note">ការគូសបន្ទាត់បង្ហាញពីបញ្ហាដែលរកឃើញ ឬចំណុចត្រូវពិនិត្យ។ វាមិនមែនជាការបញ្ជាក់ថាអត្ថបទខុសទាំងស្រុងទេ។</p>
+          </div>
+          <aside class="issues-panel" aria-label="Detected writing issues">
+            <div class="issues-header"><div><div class="eyebrow tiny">WRITING INSIGHTS</div><h2>លទ្ធផលពិនិត្យ</h2></div><div class="issue-total" id="issueTotal">0</div></div>
+            <div class="filter-bar" role="group" aria-label="Filter issues"><button class="filter active" data-filter="all" type="button">ទាំងអស់</button><button class="filter" data-filter="high" type="button">សំខាន់</button><button class="filter" data-filter="suggestion" type="button">សំណើ</button></div>
+            <div id="issueList" class="issue-list"><div class="empty-state"><span>✓</span><b>រួចរាល់សម្រាប់ពិនិត្យ</b><p>បញ្ចូលអត្ថបទដើម្បីមើលការពន្យល់ និងសំណើកែតម្រូវ។</p></div></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <div class="summary-panel">
+          <div class="section-heading"><span class="small-icon">◫</span><h2>សេចក្ដីសង្ខេបនៃការពិនិត្យ</h2></div>
+          <div class="stat-grid">
+            <div class="stat"><b id="statAll">0</b><span>បញ្ហាដែលបានសម្គាល់</span></div>
+            <div class="stat"><b id="statSpelling">0</b><span>អក្ខរាវិរុទ្ធ</span></div>
+            <div class="stat"><b id="statGrammar">0</b><span>វេយ្យាករណ៍ / រចនាសម្ព័ន្ធ</span></div>
+            <div class="stat"><b id="statStyle">0</b><span>ការណែនាំផ្សេងៗ</span></div>
+          </div>
+          <p class="muted-note" id="analysisNote">លទ្ធផលត្រូវបានបង្កើតតាមវិធានដែលអាចផ្ទៀងផ្ទាត់បាន។ វិភាគន័យស្មុគស្មាញ និងវេយ្យាករណ៍ពេញលេញមិនទាន់គាំទ្រទេ។</p>
+        </div>
+        <div class="download-panel">
+          <div class="section-heading"><span class="small-icon">↓</span><h2>ទាញយកលទ្ធផល</h2></div>
+          <p>របាយការណ៍រួមបញ្ចូលទីតាំងបញ្ហា ដើមអត្ថបទ ការកែតម្រូវ កម្រិតភាពប្រាកដ និងប្រភពច្បាប់/វិធានដែលមាន។</p>
+          <div class="download-buttons">
+            <button class="download-main" type="button" id="downloadHtml">↓ របាយការណ៍ HTML</button>
+            <button class="download-secondary" type="button" id="downloadDocx">↓ Word</button>
+            <button class="download-secondary" type="button" id="downloadCsv">↓ CSV</button>
+            <button class="download-secondary" type="button" id="printPdf">▣ PDF</button>
+            <button class="download-secondary" type="button" id="downloadTxt">↓ អត្ថបទ TXT</button>
+          </div>
+          <small>PDF ប្រើបង្អួចបោះពុម្ពរបស់កម្មវិធីរុករក (ជ្រើស “Save as PDF”)។ DOCX ដែលបាននាំចេញមិនរក្សាទ្រង់ទ្រាយឯកសារដើមទេ។</small>
+        </div>
+      </section>
+
+      <section class="dictionary-panel">
+        <div class="dictionary-heading"><div><div class="eyebrow tiny">DICTIONARY SOURCES</div><h2>ប្រភពពាក្យ និងការផ្ទៀងផ្ទាត់</h2><p>អាចផ្ទុកបញ្ជីពាក្យពីវចនានុក្រមជួន ណាត ដើម្បីពង្រីកការត្រួតពិនិត្យ។ បញ្ជីពាក្យមិនមែនជាម៉ាស៊ីនពិនិត្យវេយ្យាករណ៍ទេ។</p></div><div class="dictionary-state" id="dictionaryStatus">បញ្ជីពាក្យគំរូ</div></div>
+        <div class="dictionary-controls">
+          <button class="primary-button secondary" id="loadRemoteDict" type="button">↻ ផ្ទុកបញ្ជីពាក្យជួន ណាត (តាមអ៊ីនធឺណិត)</button>
+          <input id="dictFile" type="file" accept=".csv,.txt,.tsv,.json" hidden>
+          <button class="light-button" id="dictUpload" type="button">↥ នាំចូលបញ្ជីពាក្យផ្ទាល់ខ្លួន</button>
+          <label class="switch-label"><input id="showUnknown" type="checkbox"> សម្គាល់ពាក្យមិនស្គាល់ (ពិសោធន៍)</label>
+        </div>
+        <p class="muted-note" id="dictMessage">កំពុងប្រើបញ្ជីពាក្យគំរូតូច។ ដើម្បីពិនិត្យវាក្យសព្ទជាច្រើន សូមផ្ទុកវចនានុក្រមពេញលេញ។</p>
+      </section>
+
+      <footer><div><strong>KhmerProof</strong> · មុខងារសាកល្បងសម្រាប់សាធារណជន · ការសម្រេចចុងក្រោយស្ថិតនៅលើអ្នកសរសេរ</div><div>Privacy-first · No paid AI API · <a href="docs/MASTER_BUILD_PROMPT.md">Project brief</a></div></footer>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite" class="toast"></div>
+</body>
+</html>

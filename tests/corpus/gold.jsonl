@@ -1,0 +1,161 @@
+{"id":"reg-001","group":"regression","mode":"general","text":"ខ្ងុំទៅសាលារៀន។","expect":[{"original":"ខ្ងុំ","category":"spelling","suggestion":"ខ្ញុំ"}],"note":"The obvious mistake the prototype missed: wrong subscript in the commonest pronoun."}
+{"id":"reg-002","group":"regression","mode":"general","text":"ខ្ញុំចង់អានពត៌មានថ្មីៗ។","expect":[{"original":"ពត៌មាន","category":"spelling","suggestion":"ព័ត៌មាន"}],"note":"Prototype pair existed but segmentation split the word across a known fragment."}
+{"id":"reg-003","group":"regression","mode":"general","text":"ការិយាល៏យនេះបើកនៅថ្ងៃច័ន្ទ។","expect":[{"original":"ការិយាល៏យ","category":"spelling","suggestion":"ការិយាល័យ"}],"note":"Prototype's greedy segmenter split the orthographic cluster and flagged ិយាល៏យ."}
+{"id":"reg-004","group":"regression","mode":"general","text":"ពួកយើងបានពិនិត្សឯកសារទាំងអស់។","expect":[{"original":"ពិនិត្ស","category":"spelling","suggestion":"ពិនិត្យ"}],"note":"Not in any curated list: must be found through the dictionary."}
+{"id":"reg-005","group":"regression","mode":"general","text":"សមត្តភាពរបស់គាត់ល្អណាស់។","expect":[{"original":"សមត្តភាព","category":"spelling","suggestion":"សមត្ថភាព"}],"note":"Misspelling splits into two list fragments."}
+{"id":"sp-001","group":"spelling","mode":"general","text":"សួរស្តី! តើអ្នកសុខសប្បាយទេ?","expect":[{"original":"សួរស្តី","category":"spelling","suggestion":"សួស្ដី"}]}
+{"id":"sp-002","group":"spelling","mode":"general","text":"សូមអនុញ្ញាតិឱ្យខ្ញុំនិយាយ។","expect":[{"original":"អនុញ្ញាតិ","category":"spelling","suggestion":"អនុញ្ញាត"}]}
+{"id":"sp-003","group":"spelling","mode":"general","text":"បច្ចប្បន្ននេះ សិស្សច្រើនប្រើទូរស័ព្ទដៃ។","expect":[{"original":"បច្ចប្បន្ន","category":"spelling","suggestion":"បច្ចុប្បន្ន"}]}
+{"id":"sp-004","group":"spelling","mode":"general","text":"សុវត្តិភាពចរាចរណ៍ជាការទទួលខុសត្រូវរបស់យើងទាំងអស់គ្នា។","expect":[{"original":"សុវត្តិភាព","category":"spelling","suggestion":"សុវត្ថិភាព"}]}
+{"id":"sp-005","group":"spelling","mode":"general","text":"សូមផ្ដល់ឧទាហរណ៏មួយ។","expect":[{"original":"ឧទាហរណ៏","category":"spelling","suggestion":"ឧទាហរណ៍"}]}
+{"id":"sp-006","group":"spelling","mode":"general","text":"វប្បធម៏ខ្មែរមានប្រវត្តិយូរលង់។","expect":[{"original":"វប្បធម៏","category":"spelling","suggestion":"វប្បធម៌"}]}
+{"id":"sp-007","group":"spelling","mode":"general","text":"ឥលូវនេះ ខ្ញុំរវល់បន្តិច។","expect":[{"original":"ឥលូវនេះ","category":"spelling","suggestion":"ឥឡូវនេះ"}]}
+{"id":"sp-008","group":"spelling","mode":"general","text":"គាត់អោយសៀវភៅមួយក្បាលដល់ខ្ញុំ។","expect":[{"original":"អោយ","category":"spelling","suggestion":"ឱ្យ"}]}
+{"id":"sp-009","group":"spelling","mode":"general","text":"ខ្ញុំចង់ទិញកំព្យូទ័រថ្មីមួយ។","expect":[{"original":"កំព្យូទ័រ","category":"spelling","suggestion":"កុំព្យូទ័រ"}]}
+{"id":"sp-010","group":"spelling","mode":"general","text":"ប្រជាជនត្រូវការប្រសិទ្ឋភាពនៃសេវាសាធារណៈ។","expect":[{"original":"ប្រសិទ្ឋភាព","category":"spelling","suggestion":"ប្រសិទ្ធភាព"}]}
+{"id":"sp-011","group":"spelling","mode":"general","text":"ឧស្សាហ៍កម្មកាត់ដេររីកចម្រើនខ្លាំង។","expect":[{"original":"ឧស្សាហ៍កម្ម","category":"spelling","suggestion":"ឧស្សាហកម្ម"}]}
+{"id":"sp-012","group":"spelling","mode":"general","text":"យើងត្រូវការពារធម្មជាតដើម្បីកូនចៅ។","expect":[{"original":"ធម្មជាត","category":"spelling","suggestion":"ធម្មជាតិ"}]}
+{"id":"sp-013","group":"spelling","mode":"general","text":"ខ្ញុំទូរសព្ទទៅម្ដាយរាល់ល្ងាច។","expect":[{"original":"ទូរសព្ទ","category":"spelling","suggestion":"ទូរស័ព្ទ"}]}
+{"id":"sp-014","group":"spelling","mode":"general","text":"បណ្ណាល៏យសាលាបើករហូតដល់ម៉ោងប្រាំ។","expect":[{"original":"បណ្ណាល៏យ","category":"spelling","suggestion":"បណ្ណាល័យ"}]}
+{"id":"sp-015","group":"spelling","mode":"general","text":"គម្រោងនេះមានប្រយោជន៏ច្រើនដល់សហគមន៍។","expect":[{"original":"ប្រយោជន៏","category":"spelling","suggestion":"ប្រយោជន៍"}]}
+{"id":"sp-016","group":"spelling","mode":"general","text":"សិស្សត្រូវគោរពវិន័យសាលារៀន។ គ្រូពិនិត្យកិច្ចការសិស្សរាល់ថ្ងៃ។ ពួកគេរៀនភាសារខ្មែរ។","expect":[{"original":"ភាសារ","category":"spelling","suggestion":"ភាសា"}]}
+{"id":"sp-017","group":"spelling","mode":"general","text":"ខ្ញុំស្រលាញ់ប្រទេសកម្ពុជាណាស់។","expect":[],"note":"ស្រលាញ់ is a Chuon Nath headword alongside ស្រឡាញ់: must not be flagged."}
+{"id":"sp-018","group":"spelling","mode":"general","text":"ក្រសួងអប់រំបានចេញសេចក្ដីណែនាំថ្មី។","expect":[]}
+{"id":"sp-019","group":"spelling","mode":"general","text":"គាត់ធ្វើការនៅមន្ទីរពេទ្យខេត្តតាកែវ។","expect":[]}
+{"id":"sp-020","group":"spelling","mode":"general","text":"ម្ដាយខ្ញុំលក់បន្លែនៅផ្សារចាស់។","expect":[]}
+{"id":"sp-021","group":"spelling","mode":"general","text":"គាត់ជាគ្រូបង្រៀនដ៏ល្អម្នាក់។","expect":[]}
+{"id":"sp-022","group":"spelling","mode":"general","text":"ក្មេងៗកំពុងលេងបាល់ទាត់នៅទីលាន។","expect":[]}
+{"id":"sp-023","group":"spelling","mode":"general","text":"អ្នកស្រុកដាំស្រូវនៅរដូវវស្សា។","expect":[]}
+{"id":"sp-024","group":"spelling","mode":"general","text":"សៀវភៅនេះពិបាកអានបន្តិច ប៉ុន្តែមានប្រយោជន៍ណាស់។","expect":[]}
+{"id":"sp-025","group":"spelling","mode":"general","text":"យើងត្រូវការការណ៏នេះជាបន្ទាន់។","expect":[{"original":"ការណ៏","category":"spelling","suggestion":"ការណ៍"}]}
+{"id":"gr-001","group":"grammar","mode":"general","text":"ខ្ញុំនិងទៅផ្សារនៅថ្ងៃស្អែក។","expect":[{"original":"និង","category":"grammar","suggestion":"នឹង"}]}
+{"id":"gr-002","group":"grammar","mode":"general","text":"យើងនិងធ្វើការនេះឱ្យហើយនៅសប្ដាហ៍ក្រោយ។","expect":[{"original":"និង","category":"grammar","suggestion":"នឹង"}]}
+{"id":"gr-003","group":"grammar","mode":"general","text":"ខ្ញុំនឹងគាត់ជាមិត្តភក្ដិតាំងពីក្មេង។","expect":[{"original":"នឹង","category":"grammar","suggestion":"និង"}]}
+{"id":"gr-004","group":"grammar","mode":"general","text":"គាត់ក៏ទៅដែល។","expect":[{"original":"ដែល","category":"grammar","suggestion":"ដែរ"}]}
+{"id":"gr-005","group":"grammar","mode":"general","text":"សៀវភៅដែរខ្ញុំទិញនៅលើតុ។","expect":[{"original":"ដែរ","category":"grammar","suggestion":"ដែល"}]}
+{"id":"gr-006","group":"grammar","mode":"general","text":"ខ្ញុំសាលារៀនទៅ។","expect":[{"original":"សាលារៀនទៅ","category":"structure","suggestion":"ទៅសាលារៀន"}]}
+{"id":"gr-007","group":"grammar","mode":"general","text":"ម្សិលមិញ ខ្ញុំនឹងទៅលេងផ្ទះមិត្ត។","expect":[{"original":"នឹង","category":"grammar","suggestion":"បាន"}]}
+{"id":"gr-008","group":"grammar","mode":"general","text":"សិស្សនេះរៀនពូកែជាងបំផុតក្នុងថ្នាក់។","expect":[{"original":"ជាងបំផុត","category":"grammar"}]}
+{"id":"gr-009","group":"grammar","mode":"general","text":"ខ្ញុំខ្ញុំមិនដឹងរឿងនេះទេ។","expect":[{"original":"ខ្ញុំខ្ញុំ","category":"repetition"}]}
+{"id":"gr-010","group":"grammar","mode":"general","text":"គ្រូ និង និង សិស្សបានចូលរួមកម្មវិធី។","expect":[{"original":"និង និង","category":"repetition"}]}
+{"id":"gr-011","group":"grammar","mode":"academic","text":"សេចក្ដីសិក្សានេះផ្ដោតលើការអប់រំកុមារ។","expect":[{"original":"សេចក្ដីសិក្សា","category":"wording","suggestion":"ការសិក្សា"}]}
+{"id":"gr-012","group":"grammar","mode":"general","text":"សេចក្ដីងាររបស់គាត់ច្រើនណាស់។","expect":[{"original":"សេចក្ដីងារ","category":"wording","suggestion":"ការងារ"}]}
+{"id":"gr-013","group":"grammar","mode":"general","text":"សិស្ស ៣០ ចូលរួមកម្មវិធីនេះ។","expect":[{"original":"៣០","category":"missing","suggestion":"៣០ នាក់"}]}
+{"id":"gr-014","group":"grammar","mode":"general","text":"គាត់មិនត្រឹមតែរៀនពូកែ។","expect":[{"original":"មិនត្រឹមតែ","category":"missing"}]}
+{"id":"gr-015","group":"grammar","mode":"general","text":"តើអ្នកនឹងទៅ។","expect":[{"original":"តើ","category":"missing"},{"original":"។","category":"punctuation","suggestion":"?"}]}
+{"id":"gr-016","group":"grammar","mode":"general","text":"ខ្ញុំក៏ចូលចិត្តអានសៀវភៅផងដែល។","expect":[{"original":"ផងដែល","category":"spelling|grammar","suggestion":"ផងដែរ"}]}
+{"id":"gr-017","group":"grammar","mode":"general","text":"គាត់ក៏និយាយដូចគ្នាដែល។","expect":[{"original":"ដូចគ្នាដែល","category":"spelling|grammar","suggestion":"ដូចគ្នាដែរ"}]}
+{"id":"gr-c01","group":"grammar-correct","mode":"general","text":"ខ្ញុំនឹងទៅផ្សារនៅថ្ងៃស្អែក។","expect":[]}
+{"id":"gr-c02","group":"grammar-correct","mode":"general","text":"ខ្ញុំនិងគាត់ជាមិត្តភក្ដិតាំងពីក្មេង។","expect":[]}
+{"id":"gr-c03","group":"grammar-correct","mode":"general","text":"គាត់ក៏ទៅដែរ។","expect":[]}
+{"id":"gr-c04","group":"grammar-correct","mode":"general","text":"សៀវភៅដែលខ្ញុំទិញនៅលើតុ។","expect":[]}
+{"id":"gr-c05","group":"grammar-correct","mode":"general","text":"ខ្ញុំទៅសាលារៀន។","expect":[]}
+{"id":"gr-c06","group":"grammar-correct","mode":"general","text":"ម្សិលមិញ ខ្ញុំបានទៅលេងផ្ទះមិត្ត។","expect":[]}
+{"id":"gr-c07","group":"grammar-correct","mode":"general","text":"បញ្ហានេះទាក់ទងនឹងការអប់រំ។","expect":[]}
+{"id":"gr-c08","group":"grammar-correct","mode":"general","text":"គាត់មិនដែលមកយឺតទេ។","expect":[]}
+{"id":"gr-c09","group":"grammar-correct","mode":"general","text":"សិស្ស ៣០ នាក់ចូលរួមកម្មវិធីនេះ។","expect":[]}
+{"id":"gr-c10","group":"grammar-correct","mode":"general","text":"គាត់មិនត្រឹមតែរៀនពូកែប៉ុណ្ណោះទេ ថែមទាំងជួយមិត្តភក្ដិទៀតផង។","expect":[]}
+{"id":"gr-c11","group":"grammar-correct","mode":"general","text":"ទោះបីជាភ្លៀងខ្លាំងក៏ដោយ ក៏គាត់នៅតែមកធ្វើការ។","expect":[]}
+{"id":"gr-c12","group":"grammar-correct","mode":"general","text":"តើអ្នកនឹងទៅណា?","expect":[]}
+{"id":"gr-c13","group":"grammar-correct","mode":"general","text":"ក្មេងៗកំពុងរៀនអាន និងសរសេរ។","expect":[]}
+{"id":"gr-c14","group":"grammar-correct","mode":"general","text":"សិស្សនេះរៀនពូកែជាងគេក្នុងថ្នាក់។","expect":[]}
+{"id":"gr-c15","group":"grammar-correct","mode":"general","text":"សេចក្ដីសុខរបស់គ្រួសារសំខាន់ជាងទ្រព្យសម្បត្តិ។","expect":[]}
+{"id":"gr-c16","group":"grammar-correct","mode":"general","text":"គាត់យល់ស្របនឹងសំណើរបស់ក្រុមការងារ។","expect":[]}
+{"id":"gr-c17","group":"grammar-correct","mode":"general","text":"ខ្ញុំធ្លាប់ទៅលេងខេត្តសៀមរាបពីរដង។","expect":[]}
+{"id":"gr-c18","group":"grammar-correct","mode":"general","text":"ការងារដែលអ្នកធ្វើមានសារៈសំខាន់ណាស់។","expect":[]}
+{"id":"pu-001","group":"punctuation","mode":"general","text":"ខ្ញុំទៅសាលារៀន.","expect":[{"original":".","category":"punctuation","suggestion":"។"}]}
+{"id":"pu-002","group":"punctuation","mode":"general","text":"ខ្ញុំទៅសាលារៀន។។","expect":[{"original":"។។","category":"punctuation","suggestion":"។"}]}
+{"id":"pu-003","group":"punctuation","mode":"general","text":"ខ្ញុំទៅសាលារៀន។គាត់ទៅផ្សារ។","expect":[{"original":"។","category":"punctuation","suggestion":"។ "}]}
+{"id":"pu-004","group":"punctuation","mode":"general","text":"សិស្សថ្មី ៗ ចូលរៀននៅថ្ងៃនេះ។","expect":[{"original":" ៗ","category":"punctuation","suggestion":"ៗ"}]}
+{"id":"pu-005","group":"punctuation","mode":"general","text":"គាត់និយាយថា «ខ្ញុំនឹងមកវិញ។","expect":[{"original":"«","category":"punctuation"}]}
+{"id":"pu-006","group":"punctuation","mode":"general","text":"សម្ភារៈដែលត្រូវការ: ប៊ិច សៀវភៅ និងបន្ទាត់។","expect":[{"original":":","category":"punctuation","suggestion":"៖"}]}
+{"id":"pu-007","group":"punctuation","mode":"general","text":"ខ្ញុំចូលចិត្តអានសៀវភៅ  នៅពេលទំនេរ។","expect":[{"original":"  ","category":"punctuation","suggestion":" "}]}
+{"id":"pu-c01","group":"punctuation-correct","mode":"general","text":"ខ្ញុំទៅសាលារៀន។ គាត់ទៅផ្សារ។","expect":[]}
+{"id":"pu-c02","group":"punctuation-correct","mode":"general","text":"ផ្លែឈើមានច្រើនប្រភេទ ដូចជា ចេក ស្វាយ ម្នាស់ ។ល។","expect":[]}
+{"id":"pu-c03","group":"punctuation-correct","mode":"general","text":"គាត់និយាយថា «ខ្ញុំនឹងមកវិញ»។","expect":[]}
+{"id":"pu-c04","group":"punctuation-correct","mode":"general","text":"សម្ភារៈដែលត្រូវការ៖ ប៊ិច សៀវភៅ និងបន្ទាត់។","expect":[]}
+{"id":"pu-c05","group":"punctuation-correct","mode":"general","text":"ថ្ងៃនេះ អាកាសធាតុក្ដៅខ្លាំង។","expect":[]}
+{"id":"un-001","group":"unicode","mode":"general","text":"ខ្ញំុទៅសាលារៀន។","expect":[{"original":"ខ្ញំុ","category":"unicode","suggestion":"ខ្ញុំ"}],"note":"nikahit typed before the vowel u: renders the same in many fonts."}
+{"id":"un-002","group":"unicode","mode":"general","text":"ប្រវត្តិសាស្រ្តខ្មែរ","expect":[{"original":"ស្រ្ត","category":"unicode","suggestion":"ស្ត្រ"}],"note":"coeng-ro typed before coeng-ta."}
+{"id":"un-003","group":"unicode","mode":"general","text":"ឯកសារ�នេះខូច។","expect":[{"original":"�","category":"unicode"}]}
+{"id":"wc-001","group":"wording","mode":"government","text":"ក្រសួងអត់មានថវិកាគ្រប់គ្រាន់ទេ។","expect":[{"original":"អត់មាន","category":"wording","suggestion":"គ្មាន"}]}
+{"id":"wc-002","group":"wording","mode":"administrative","text":"សូមបង់លុយនៅបញ្ជរលេខ ៣។","expect":[{"original":"លុយ","category":"wording","suggestion":"ប្រាក់"}]}
+{"id":"wc-003","group":"wording","mode":"general","text":"ម៉េចក៏អ្នកមកយឺត?","expect":[{"original":"ម៉េច","category":"wording"}]}
+{"id":"wc-004","group":"wording","mode":"government","text":"មន្ត្រីបានជិះឡានទៅខេត្តកំពត។","expect":[{"original":"ឡាន","category":"wording","suggestion":"រថយន្ត"}]}
+{"id":"wc-005","group":"wording","mode":"academic","text":"អ្នកស្រាវជ្រាវបានធ្វើការសិក្សាលើទិន្នន័យនេះ។","expect":[{"original":"ធ្វើការសិក្សា","category":"unnecessary","suggestion":"សិក្សា"}]}
+{"id":"wc-006","group":"wording","mode":"general","text":"ចឹងយើងត្រូវចាប់ផ្ដើមឥឡូវនេះ។","expect":[{"original":"ចឹង","category":"wording"}]}
+{"id":"wc-c01","group":"wording-correct","mode":"general","text":"ខ្ញុំអត់ដឹងទេ។","expect":[],"note":"អត់ is acceptable in general mode."}
+{"id":"wc-c02","group":"wording-correct","mode":"government","text":"ក្រសួងមិនមានថវិកាគ្រប់គ្រាន់ទេ។","expect":[]}
+{"id":"wc-c03","group":"wording-correct","mode":"government","text":"គាត់មានការអត់ធ្មត់ខ្ពស់។","expect":[],"note":"អត់ inside the compound អត់ធ្មត់ must not be flagged."}
+{"id":"te-001","group":"terminology","mode":"general","text":"សេចក្ដីណែនាំនេះ និងសេចក្តីសម្រេចនោះ ត្រូវអនុវត្តជាមួយសេចក្ដីជូនដំណឹងថ្មី។","expect":[{"original":"សេចក្តីសម្រេច","category":"terminology"}]}
+{"id":"te-002","group":"terminology","mode":"legal","text":"អ្នកទិញត្រូវបង់ប្រាក់ក្នុងរយៈពេល ៣០ ថ្ងៃ។ អ្នកជាវមានសិទ្ធិទទួលទំនិញ។","expect":[{"original":"អ្នកជាវ","category":"terminology"}]}
+{"id":"te-003","group":"terminology","mode":"legal","text":"ក្រុមហ៊ុន ក (តទៅនេះហៅថា «អ្នកលក់») យល់ព្រមលក់ដីនេះ។ «អ្នកលក»ត្រូវប្រគល់ប្លង់ដី។","expect":[{"original":"អ្នកលក","category":"terminology|spelling","occurrence":2}]}
+{"id":"te-004","group":"terminology","mode":"general","text":"ខ្ញុំមានសៀវភៅ ៣ ក្បាល និងប៊ិច 5 ដើម។","expect":[{"original":"5","category":"terminology"}]}
+{"id":"md-001","group":"modern","mode":"general","text":"សិស្សប្រើអ៊ីនធឺណិតដើម្បីស្រាវជ្រាវព័ត៌មាន។","expect":[]}
+{"id":"md-002","group":"modern","mode":"general","text":"សូមផ្ញើឯកសារតាមអ៊ីមែលមកខ្ញុំ។","expect":[]}
+{"id":"md-003","group":"modern","mode":"general","text":"គេហទំព័រនេះផ្ដល់ព័ត៌មានអំពីសុខភាព។","expect":[]}
+{"id":"md-004","group":"modern","mode":"general","text":"បច្ចេកវិទ្យាឌីជីថលកំពុងផ្លាស់ប្ដូរសេដ្ឋកិច្ច។","expect":[]}
+{"id":"md-005","group":"modern","mode":"general","text":"ក្រុមហ៊ុនបានដាក់ឱ្យប្រើកម្មវិធីទូរស័ព្ទដៃថ្មី។","expect":[]}
+{"id":"md-006","group":"modern","mode":"general","text":"បណ្ដាញសង្គមមានឥទ្ធិពលលើយុវជន។","expect":[]}
+{"id":"md-007","group":"modern","mode":"general","text":"សូមកុំចែករំលែកពាក្យសម្ងាត់របស់អ្នក។","expect":[]}
+{"id":"md-008","group":"modern","mode":"general","text":"ការប្រែប្រួលអាកាសធាតុប៉ះពាល់ដល់កសិកម្ម។","expect":[]}
+{"id":"md-009","group":"modern","mode":"general","text":"ធនាគារបានបញ្ចុះអត្រាការប្រាក់សម្រាប់ប្រាក់កម្ចីលំនៅដ្ឋាន។","expect":[]}
+{"id":"md-010","group":"modern","mode":"general","text":"និស្សិតត្រូវដាក់និក្ខេបបទមុនខែធ្នូ។","expect":[]}
+{"id":"md-011","group":"modern","mode":"general","text":"មន្ទីរពេទ្យកំពុងផ្ដល់ថ្នាំបង្ការដល់កុមារ។","expect":[]}
+{"id":"md-012","group":"modern","mode":"general","text":"ទិន្នន័យទាំងនេះត្រូវរក្សាទុកក្នុងមូលដ្ឋានទិន្នន័យ។","expect":[]}
+{"id":"md-013","group":"modern","mode":"general","text":"អ្នកប្រើប្រាស់អាចទាញយកកម្មវិធីដោយឥតគិតថ្លៃ។","expect":[]}
+{"id":"md-014","group":"modern","mode":"general","text":"វិស័យទេសចរណ៍ចាប់ផ្ដើមងើបឡើងវិញ។","expect":[]}
+{"id":"md-015","group":"modern","mode":"general","text":"ថាមពលព្រះអាទិត្យជាប្រភពអគ្គិសនីស្អាត។","expect":[]}
+{"id":"nm-001","group":"names","mode":"general","text":"លោក សុខ ពិសិដ្ឋ បានមកដល់រាជធានីភ្នំពេញ។","expect":[]}
+{"id":"nm-002","group":"names","mode":"general","text":"កញ្ញា ចាន់ សុភា រៀននៅសាកលវិទ្យាល័យភូមិន្ទភ្នំពេញ។","expect":[]}
+{"id":"nm-003","group":"names","mode":"general","text":"ខេត្តបាត់ដំបងល្បីខាងស្រូវ។","expect":[]}
+{"id":"nm-004","group":"names","mode":"general","text":"ប្រាសាទអង្គរវត្តស្ថិតនៅខេត្តសៀមរាប។","expect":[]}
+{"id":"nm-005","group":"names","mode":"general","text":"ទន្លេមេគង្គហូរកាត់ខេត្តក្រចេះ និងខេត្តស្ទឹងត្រែង។","expect":[]}
+{"id":"nm-006","group":"names","mode":"government","text":"ឯកឧត្ដម ហេង សំណាង បានអញ្ជើញចូលរួមពិធីបើក។","expect":[]}
+{"id":"nm-007","group":"names","mode":"general","text":"ខ្ញុំធ្លាប់ទៅលេងប្រទេសជប៉ុន និងប្រទេសកូរ៉េ។","expect":[]}
+{"id":"nm-008","group":"names","mode":"general","text":"ភូមិរបស់ខ្ញុំនៅស្រុកកំពង់ត្រាច ខេត្តកំពត។","expect":[]}
+{"id":"nm-009","group":"names","mode":"general","text":"សមាគមអាស៊ានមានប្រទេសជាសមាជិកដប់។","expect":[]}
+{"id":"nm-010","group":"names","mode":"general","text":"លោកស្រី ម៉ៅ សុជាតា ជានាយិកាសាលា។","expect":[]}
+{"id":"lg-001","group":"legal","mode":"legal","text":"ភាគីទីមួយត្រូវបង់ប្រាក់ឱ្យភាគីទីពីរក្នុងរយៈពេល ៣០ ថ្ងៃ។","expect":[]}
+{"id":"lg-002","group":"legal","mode":"legal","text":"កិច្ចសន្យានេះចូលជាធរមានចាប់ពីថ្ងៃចុះហត្ថលេខា។","expect":[]}
+{"id":"lg-003","group":"legal","mode":"legal","text":"ភាគីណាមួយមិនអាចផ្ទេរសិទ្ធិរបស់ខ្លួនទៅតតិយជនបានឡើយ។","expect":[]}
+{"id":"lg-004","group":"legal","mode":"legal","text":"វិវាទទាំងឡាយត្រូវដោះស្រាយដោយការផ្សះផ្សាជាមុនសិន។","expect":[]}
+{"id":"lg-005","group":"legal","mode":"legal","text":"អនុក្រឹត្យនេះមានប្រសិទ្ធភាពអនុវត្តចាប់ពីថ្ងៃចុះហត្ថលេខាតទៅ។","expect":[]}
+{"id":"lg-006","group":"legal","mode":"legal","text":"បទប្បញ្ញត្តិទាំងឡាយណាដែលផ្ទុយនឹងអនុក្រឹត្យនេះ ត្រូវទុកជានិរាករណ៍។","expect":[]}
+{"id":"lg-007","group":"legal","mode":"legal","text":"ម្ចាស់បំណុលមានសិទ្ធិទាមទារសំណងពីកូនបំណុល។","expect":[]}
+{"id":"lg-008","group":"legal","mode":"legal","text":"តុលាការមានយុត្តាធិការលើវិវាទនេះ។","expect":[]}
+{"id":"lg-009","group":"legal","mode":"legal","text":"និយោជកត្រូវបង់ប្រាក់ឈ្នួលឱ្យកម្មករយ៉ាងហោចណាស់ម្ដងក្នុងមួយខែ។","expect":[]}
+{"id":"lg-010","group":"legal","mode":"legal","text":"ព័ត៌មានសម្ងាត់មិនត្រូវបានបង្ហាញដល់តតិយជនទេ។","expect":[]}
+{"id":"lg-011","group":"legal","mode":"legal","text":"ជនជាប់ចោទមានសិទ្ធិមានមេធាវីការពារក្ដី។","expect":[]}
+{"id":"lg-012","group":"legal","mode":"legal","text":"អ្នកលក់ត្រូវធានាថាទ្រព្យសម្បត្តិគ្មានបំណុល។","expect":[]}
+{"id":"lg-e01","group":"legal-error","mode":"legal","text":"ភាគីទីមួយត្រូវបង់ប្រាក់ ៣០ ភាគរយ និង/ឬ ផ្ដល់ការធានា។","expect":[{"original":"និង/ឬ","category":"clarity"}]}
+{"id":"lg-e02","group":"legal-error","mode":"legal","text":"អ្នកលក់ត្រូវប្រគល់ឯកសារផ្សេងៗដល់អ្នកទិញ។","expect":[{"original":"ផ្សេងៗ","category":"clarity"}]}
+{"id":"lg-e03","group":"legal-error","mode":"legal","text":"ភាគីទីពីរមិនត្រូវផ្ទេរសិទ្ធិអោយតតិយជនឡើយ។","expect":[{"original":"អោយ","category":"spelling","suggestion":"ឱ្យ"}]}
+{"id":"go-001","group":"government","mode":"government","text":"រាជរដ្ឋាភិបាលកម្ពុជាបានអនុម័តគោលនយោបាយជាតិស្ដីពីការអប់រំ។","expect":[]}
+{"id":"go-002","group":"government","mode":"government","text":"ក្រសួងសុខាភិបាលបានចេញសេចក្ដីជូនដំណឹងស្ដីពីការការពារជំងឺគ្រុនឈាម។","expect":[]}
+{"id":"go-003","group":"administrative","mode":"administrative","text":"សូមលោកប្រធាននាយកដ្ឋានមេត្តាពិនិត្យ និងសម្រេចលើសំណើនេះ។","expect":[]}
+{"id":"go-004","group":"administrative","mode":"administrative","text":"កិច្ចប្រជុំនឹងប្រព្រឹត្តទៅនៅថ្ងៃព្រហស្បតិ៍ វេលាម៉ោង ៨ ព្រឹក។","expect":[]}
+{"id":"go-005","group":"government","mode":"government","text":"មន្ត្រីរាជការត្រូវគោរពក្រមសីលធម៌វិជ្ជាជីវៈ។","expect":[]}
+{"id":"go-006","group":"administrative","mode":"administrative","text":"សូមភ្ជាប់មកជាមួយនូវអត្តសញ្ញាណប័ណ្ណ និងសំបុត្របញ្ជាក់កំណើត។","expect":[]}
+{"id":"go-007","group":"government","mode":"government","text":"រដ្ឋបាលថ្នាក់ក្រោមជាតិមានតួនាទីផ្ដល់សេវាសាធារណៈដល់ពលរដ្ឋ។","expect":[]}
+{"id":"go-008","group":"administrative","mode":"administrative","text":"របាយការណ៍ប្រចាំខែត្រូវដាក់ជូនមុនថ្ងៃទី ៥ នៃខែបន្ទាប់។","expect":[]}
+{"id":"ge-001","group":"general","mode":"general","text":"ព្រឹកនេះ ខ្ញុំក្រោកពីដំណេកពីព្រលឹម។","expect":[]}
+{"id":"ge-002","group":"general","mode":"general","text":"ប្អូនស្រីរបស់ខ្ញុំចូលចិត្តគូររូប។","expect":[]}
+{"id":"ge-003","group":"general","mode":"general","text":"យើងគួរតែញ៉ាំបន្លែ និងផ្លែឈើឱ្យបានច្រើន។","expect":[]}
+{"id":"ge-004","group":"general","mode":"general","text":"ភ្លៀងធ្លាក់ខ្លាំងពេញមួយយប់។","expect":[]}
+{"id":"ge-005","group":"general","mode":"general","text":"ឪពុកខ្ញុំធ្វើស្រែនៅជនបទ។","expect":[]}
+{"id":"ge-006","group":"general","mode":"general","text":"អ្នកជិតខាងបានជួយយើងសាងសង់ផ្ទះថ្មី។","expect":[]}
+{"id":"ge-007","group":"general","mode":"general","text":"បុណ្យចូលឆ្នាំខ្មែរប្រារព្ធធ្វើនៅខែមេសា។","expect":[]}
+{"id":"ge-008","group":"general","mode":"general","text":"សិស្សានុសិស្សត្រូវរៀនសូត្រដោយយកចិត្តទុកដាក់។","expect":[]}
+{"id":"ge-009","group":"general","mode":"general","text":"តើអ្នកចង់ផឹកកាហ្វេ ឬតែ?","expect":[]}
+{"id":"ge-010","group":"general","mode":"general","text":"ផ្លូវនេះកកស្ទះខ្លាំងនៅម៉ោងចេញពីការងារ។","expect":[]}
+{"id":"ge-011","group":"general","mode":"general","text":"ជីដូនរបស់ខ្ញុំនិទានរឿងព្រេងរាល់យប់។","expect":[]}
+{"id":"ge-012","group":"general","mode":"general","text":"ទឹកទន្លេឡើងខ្ពស់នៅរដូវវស្សា។","expect":[]}
+{"id":"ge-013","group":"general","mode":"general","text":"គាត់បានសរសេរសំបុត្រទៅមិត្តភក្ដិនៅបរទេស។","expect":[]}
+{"id":"ge-014","group":"general","mode":"general","text":"កីឡាករកម្ពុជាបានឈ្នះមេដាយមាស។","expect":[]}
+{"id":"ge-015","group":"general","mode":"general","text":"សូមអរគុណចំពោះជំនួយរបស់អ្នក។","expect":[]}
+{"id":"ge-016","group":"general","mode":"general","text":"ពួកគេកំពុងរៀបចំពិធីមង្គលការ។","expect":[]}
+{"id":"ge-017","group":"general","mode":"general","text":"ខ្ញុំត្រូវការពេលវេលាបន្ថែមដើម្បីបញ្ចប់កិច្ចការនេះ។","expect":[]}
+{"id":"ge-018","group":"general","mode":"general","text":"សត្វឆ្កែរបស់យើងចូលចិត្តដេកក្រោមដើមឈើ។","expect":[]}
+{"id":"ge-019","group":"general","mode":"general","text":"ការអានសៀវភៅជួយពង្រីកចំណេះដឹង។","expect":[]}
+{"id":"ge-020","group":"general","mode":"general","text":"ក្រុមគ្រួសារយើងទៅវត្តនៅថ្ងៃសីល។","expect":[]}
