@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QrblKVDnNx/OdsUjODpdngJ8fEaD7mgPFp6DszyfXs8='; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="KhmerProof ពិនិត្យអក្ខរាវិរុទ្ធ វេយ្យាករណ៍ និងរចនាប័ទ្មសំណេរខ្មែរ ដោយផ្អែកលើវចនានុក្រម សម្ដេច ជួន ណាត">
+<title>KhmerProof · ពិនិត្យសំណេរខ្មែរ</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script type="importmap">{"imports":{"fflate":"./vendor/fflate/browser.js"}}</script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip" href="#editor">រំលងទៅកាន់កន្លែងសរសេរ</a>
+<header class="topbar">
+  <div class="brand">
+    <img src="favicon.svg" alt="" width="28" height="28">
+    <div>
+      <h1>KhmerProof</h1>
+      <p class="tagline">ពិនិត្យអក្ខរាវិរុទ្ធ វេយ្យាករណ៍ និងរចនាប័ទ្មសំណេរខ្មែរ</p>
+    </div>
+  </div>
+  <div class="settings-row">
+    <label>របៀបសំណេរ
+      <select id="mode">
+        <option value="general">ទូទៅ</option>
+        <option value="academic">សិក្សា/ស្រាវជ្រាវ</option>
+        <option value="government">រដ្ឋាភិបាល</option>
+        <option value="administrative">រដ្ឋបាល</option>
+        <option value="legal">ច្បាប់</option>
+      </select>
+    </label>
+    <label>គោលវចនានុក្រម
+      <select id="profile">
+        <option value="standard">ស្តង់ដារទំនើប</option>
+        <option value="chuon-nath">ជួន ណាត យ៉ាងតឹងរ៉ឹង</option>
+      </select>
+    </label>
+    <button type="button" id="settingsBtn" class="ghost" aria-haspopup="dialog">⚙ សទ្ទានុក្រម</button>
+  </div>
+</header>
+
+<div class="toolbar" role="toolbar" aria-label="ឧបករណ៍">
+  <button type="button" id="uploadBtn">⬆ បើកឯកសារ</button>
+  <input type="file" id="fileInput" accept=".txt,.docx,.pdf,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+  <button type="button" id="sampleBtn" class="ghost">ឧទាហរណ៍</button>
+  <button type="button" id="undoBtn" class="ghost" disabled>↶ ត្រឡប់</button>
+  <button type="button" id="clearBtn" class="ghost">សម្អាត</button>
+  <button type="button" id="aiBtn" class="ghost" hidden>✦ ពិនិត្យបរិបទ (AI)</button>
+  <span class="spacer"></span>
+  <details class="menu" id="exportMenu">
+    <summary>⬇ ទាញយក</summary>
+    <div class="menu-body">
+      <p class="menu-head">របាយការណ៍ចំណុចដែលបានរកឃើញ</p>
+      <button type="button" data-export="pdf">PDF</button>
+      <button type="button" data-export="docx">Word (DOCX)</button>
+      <button type="button" data-export="csv">Excel (CSV)</button>
+      <button type="button" data-export="html">HTML</button>
+      <label class="check"><input type="checkbox" id="includeFullText"> បញ្ចូលអត្ថបទពេញក្នុងរបាយការណ៍</label>
+      <p class="menu-head">អត្ថបទដែលបានកែ</p>
+      <button type="button" data-export="txt">TXT</button>
+      <button type="button" data-export="corrected-docx">Word (DOCX)</button>
+    </div>
+  </details>
+</div>
+
+<main class="workspace">
+  <section class="editor-pane" aria-label="អត្ថបទ">
+    <div class="doc-info"><span id="docName">អត្ថបទថ្មី</span><span id="docStats" aria-live="polite"></span></div>
+    <div class="editor-wrap">
+      <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off" lang="km"
+        aria-label="សរសេរ ឬបិទភ្ជាប់អត្ថបទខ្មែរនៅទីនេះ" placeholder="សរសេរ ឬបិទភ្ជាប់អត្ថបទខ្មែរនៅទីនេះ ឬបើកឯកសារ TXT, DOCX ឬ PDF…"></textarea>
+    </div>
+    <div class="notices" id="notices" aria-live="polite"></div>
+    <p class="privacy">🔒 អត្ថបទរបស់អ្នកត្រូវបានពិនិត្យនៅក្នុងកម្មវិធីរុករក (browser) នេះ។ វាមិនត្រូវបានផ្ញើទៅណាទេ លុះត្រាតែអ្នកចុច PDF ការពិនិត្យ AI ឬបើកឯកសារ PDF តាមម៉ាស៊ីនមេ ហើយយល់ព្រម។</p>
+  </section>
+
+  <aside class="issues-pane" aria-label="បញ្ហាដែលបានរកឃើញ">
+    <div class="issues-head">
+      <h2>បញ្ហា <span id="issueCount" class="count">0</span></h2>
+      <span id="engineStatus" class="engine-status" role="status">កំពុងផ្ទុកវចនានុក្រម…</span>
+    </div>
+    <div class="filters" id="categoryFilters" role="group" aria-label="តម្រងតាមប្រភេទ"></div>
+    <div class="filters2">
+      <label>ទំនុកចិត្ត
+        <select id="confFilter">
+          <option value="0">ទាំងអស់</option>
+          <option value="0.55">មធ្យម ឡើងទៅ</option>
+          <option value="0.8">ខ្ពស់ប៉ុណ្ណោះ</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="showUnverified" checked> ពាក្យមិនមានក្នុងវចនានុក្រម</label>
+    </div>
+    <ol class="issue-list" id="issueList"></ol>
+    <details class="history">
+      <summary>ប្រវត្តិការសម្រេច <span id="decisionCount" class="count">0</span></summary>
+      <ol id="decisionList"></ol>
+    </details>
+  </aside>
+</main>
+
+<footer class="footer">
+  <p>វចនានុក្រមគោល៖ វចនានុក្រមខ្មែរ សម្ដេចព្រះសង្ឃរាជ ជួន ណាត (វិទ្យាស្ថានពុទ្ធសាសនបណ្ឌិត ១៩៦៧ កំណែឌីជីថលរបស់វិទ្យាស្ថានបើកទូលាយ) និងបញ្ជីពាក្យ SBBIC។ KhmerProof ផ្ដល់សំណើ មិនមែនការវិនិច្ឆ័យចុងក្រោយទេ។
+  <a href="about.html">អំពីប្រភព និងដែនកំណត់</a></p>
+</footer>
+
+<dialog id="settingsDialog" aria-labelledby="settingsTitle">
+  <form method="dialog" class="dialog-body">
+    <h2 id="settingsTitle">សទ្ទានុក្រម និងពាក្យបច្ចេកទេសរបស់អ្នក</h2>
+    <p class="hint">រក្សាទុកតែក្នុង browser នេះ។ អត្ថបទឯកសាររបស់អ្នកមិនត្រូវបានរក្សាទុកទេ។</p>
+    <label for="userWords">ពាក្យដែលត្រូវទទួលស្គាល់ (មួយបន្ទាត់មួយពាក្យ) ឧ. ឈ្មោះ ឬពាក្យបច្ចេកទេស</label>
+    <textarea id="userWords" rows="5" lang="km"></textarea>
+    <label for="termRules">ពាក្យដែលត្រូវប្រើឱ្យស៊ីសង្វាក់ (ទម្រង់៖ ពាក្យត្រឹមត្រូវ = ពាក្យជំនួស១, ពាក្យជំនួស២)</label>
+    <textarea id="termRules" rows="4" lang="km" placeholder="កិច្ចសន្យា = កុងត្រា"></textarea>
+    <fieldset>
+      <legend>ពាក្យបច្ចេកទេសដែលក្រុមប្រឹក្សាជាតិភាសាខ្មែរ អនុម័ត (NCKL)</legend>
+      <p class="hint">នាំចូលឯកសារ CSV ឬ TXT ដែលជួរទីមួយជាពាក្យខ្មែរ។ ពាក្យទាំងនេះនឹងមានអាទិភាពខ្ពស់ជាងបញ្ជីពាក្យទំនើបផ្សេងទៀត។ ប្រភព៖ <span lang="en">nckl.rac.gov.kh</span></p>
+      <input type="file" id="ncklFile" accept=".csv,.tsv,.txt">
+      <p id="ncklStatus" class="hint"></p>
+    </fieldset>
+    <div class="dialog-actions">
+      <button value="cancel" class="ghost">បោះបង់</button>
+      <button value="save" id="saveSettings">រក្សាទុក</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="consentDialog" aria-labelledby="consentTitle">
+  <form method="dialog" class="dialog-body">
+    <h2 id="consentTitle">ផ្ញើអត្ថបទទៅម៉ាស៊ីនមេ?</h2>
+    <p id="consentText"></p>
+    <label class="check"><input type="checkbox" id="consentCheck"> ខ្ញុំយល់ព្រម ហើយអត្ថបទនេះមិនមែនជាឯកសារសម្ងាត់ដែលខ្ញុំគ្មានសិទ្ធិផ្ញើ</label>
+    <div class="dialog-actions">
+      <button value="cancel" class="ghost">បោះបង់</button>
+      <button value="ok" id="consentOk" disabled>បន្ត</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

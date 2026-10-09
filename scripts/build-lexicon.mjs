@@ -172,6 +172,10 @@ async function main() {
     style: readTsv('style.tsv').map(([pattern, replacement, category, modes, confidence, explanation]) => ({ pattern, replacement, category, modes: modes.split(','), confidence, explanation })),
     nominalizers: readTsv('nominalizers.tsv').map(([wrong, correct, confidence, explanation]) => ({ wrong, correct, confidence, explanation })),
     nckl: readTsv('nckl.tsv').map(([word, en, fr, domain, ref]) => ({ word, en, fr, domain, ref })),
+    // Only rules a named person checked against the page image, with a pattern to match.
+    textbook: readTsv('textbook-rules.tsv').filter(r => r[0] !== 'rule_id').map(r => Object.fromEntries(
+      ['ruleId', 'pdfPage', 'printedPage', 'section', 'ruleText', 'exampleCorrect', 'exampleIncorrect', 'wrong', 'right', 'category', 'machineCheckable', 'verifiedBy', 'verifiedOn', 'notes'].map((k, i) => [k, r[i] || ''])))
+      .filter(r => r.verifiedBy && r.pdfPage && r.wrong && r.machineCheckable === 'yes'),
   };
   // Integrity: every curated correction must be a word the lexicon accepts on authority.
   const authoritative = SRC.CN_HEAD | SRC.MODERN | SRC.LEGAL | SRC.NAME | SRC.FUNC | SRC.NCKL;

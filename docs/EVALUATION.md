@@ -66,4 +66,4 @@ None on the gold corpus.
 
 ## Speed
 
-A 5128-word document is analysed in 469 ms on the build machine (Node.js v22.22.0).
+A 5128-word document is analysed in 405 ms on the build machine (Node.js v22.22.0).

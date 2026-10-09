@@ -61,6 +61,11 @@ export const SOURCES = {
     en: 'Comparison within this document',
     tier: 'method',
   },
+  'textbook': {
+    km: 'សៀវភៅវេយ្យាករណ៍ភាសាខ្មែរ ដែលអ្នកប្រើផ្ដល់ (វិធានបានផ្ទៀងផ្ទាត់ជាមួយរូបភាពទំព័រដើម)',
+    en: "User-supplied Khmer grammar textbook (rule verified against the page image)",
+    tier: 'authority',
+  },
   'textbook-unverified': {
     km: 'វិធាននេះមកពីគំរូមុន ដែលអះអាងថាផ្អែកលើសៀវភៅវេយ្យាករណ៍ភាសាខ្មែរ ទំព័រ PDF ១០៤។ មិនទាន់បានផ្ទៀងផ្ទាត់ទេ ព្រោះមិនមានសៀវភៅនោះក្នុងគម្រោងនេះ',
     en: 'Rule carried over from the previous prototype, which cited the grammar textbook, PDF p. 104. Not verified in this build: the textbook was not supplied.',

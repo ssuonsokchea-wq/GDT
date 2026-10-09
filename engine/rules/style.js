@@ -5,6 +5,8 @@ import { findPhrase, FORMAL_MODES } from './helpers.js';
 import { AUTHORITATIVE } from '../lexicon.js';
 import { segmentRun } from '../tokenize.js';
 
+const CATEGORY_OK = new Set(['grammar', 'structure', 'wording', 'missing', 'unnecessary', 'punctuation', 'spelling', 'clarity']);
+
 const LEGAL_VAGUE = [
   ['ជាដើម', 'ពាក្យ «ជាដើម» ធ្វើឱ្យបញ្ជីមិនកំណត់ច្បាស់។ ក្នុងអត្ថបទច្បាប់ គួររាប់បញ្ចូលធាតុទាំងអស់ ឬសរសេរឱ្យច្បាស់ថាបញ្ជីនោះជាឧទាហរណ៍។'],
   ['មួយចំនួន', '«មួយចំនួន» មិនកំណត់ចំនួនច្បាស់លាស់។ ក្នុងអត្ថបទច្បាប់ ពិចារណាកំណត់ចំនួន ឬលក្ខខណ្ឌឱ្យច្បាស់។'],
@@ -68,6 +70,16 @@ export function checkStyle(ctx) {
         confidence: p.confidence, ruleId: `style.phrase`, title: p.category === 'wording' ? 'ពាក្យលើស' : p.category === 'spelling' ? 'ច្រឡំពាក្យ' : 'ការប្រើពាក្យផ្ទុយគ្នា',
         explanation: p.explanation, suggestions: [p.replacement], source: p.category === 'grammar' || p.category === 'spelling' ? 'project-grammar' : 'project-style',
         autoFixSafe: p.confidence === 'high' });
+    }
+  }
+  // Verified textbook rules (data/curated/textbook-rules.tsv), cited by page
+  for (const r of lexicon.curated.textbook || []) {
+    for (const s of sentences) for (const hit of findPhrase(s, r.wrong)) {
+      add({ start: hit.start, end: hit.end, category: CATEGORY_OK.has(r.category) ? r.category : 'grammar', severity: 'warning', confidence: 0.75,
+        ruleId: `textbook.${r.ruleId}`, title: 'វិធានពីសៀវភៅវេយ្យាករណ៍', explanation: r.ruleText + (r.exampleCorrect ? ` ឧទាហរណ៍៖ ${r.exampleCorrect}` : ''),
+        suggestions: r.right ? [r.right] : [], source: 'textbook',
+        sourceDetail: `PDF ទំព័រ ${r.pdfPage}${r.printedPage ? `, ទំព័របោះពុម្ព ${r.printedPage}` : ''}${r.section ? `, ${r.section}` : ''} · ផ្ទៀងផ្ទាត់ដោយ ${r.verifiedBy}${r.verifiedOn ? ` (${r.verifiedOn})` : ''}`,
+        autoFixSafe: false });
     }
   }
   // ការ / សេចក្ដី nominalisers

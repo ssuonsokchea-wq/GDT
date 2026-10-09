@@ -4,22 +4,30 @@
   "private": true,
   "description": "KhmerProof: a Khmer spelling, grammar and style checker with a layered, source-traceable language engine.",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "build:data": "node scripts/build-lexicon.mjs",
-    "build:vendor": "node scripts/copy-vendor.mjs",
     "postinstall": "node scripts/copy-vendor.mjs",
     "start": "node server/server.mjs",
     "test": "node --test \"tests/unit/*.test.mjs\"",
     "test:e2e": "node --test \"tests/e2e/*.test.mjs\"",
     "evaluate": "node tests/evaluate.mjs",
-    "check": "node bin/khmerproof.mjs"
+    "check": "node bin/khmerproof.mjs check",
+    "build:data": "node scripts/build-lexicon.mjs",
+    "build:static": "node scripts/build-static.mjs",
+    "setup:pdf": "playwright-core install chromium"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.132.1",
+    "@fontsource/noto-sans-khmer": "5.2.5",
     "fflate": "0.8.3",
     "pdfjs-dist": "4.10.38",
-    "@fontsource/noto-sans-khmer": "5.2.5",
-    "@fontsource/noto-serif-khmer": "5.2.5",
-    "playwright-core": "1.56.1"
-  }
+    "playwright-core": "1.56.1",
+    "zod": "3.25.76"
+  },
+  "bin": {
+    "khmerproof": "bin/khmerproof.mjs"
+  },
+  "license": "SEE LICENSE IN README.md"
 }

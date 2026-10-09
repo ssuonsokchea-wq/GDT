@@ -1,0 +1,9 @@
+node_modules
+dist
+private
+textbook
+tests/results
+data/sources/cache
+.git
+.env
+*.log
