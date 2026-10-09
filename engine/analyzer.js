@@ -22,7 +22,7 @@ import { checkConsistency } from './rules/consistency.js';
 import { wordKey } from './normalize.js';
 import { CATEGORIES, SEVERITIES, makeFinding } from './finding.js';
 
-export const ENGINE_VERSION = '1.1.1';
+export const ENGINE_VERSION = '1.1.2';
 export const MAX_TEXT_LENGTH = 300000;
 
 export const MODES = {

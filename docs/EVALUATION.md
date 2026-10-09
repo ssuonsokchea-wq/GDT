@@ -12,10 +12,10 @@ The Chuon Nath hold-out set is different: 1 in 20 dictionary entries was exclude
 
 | Measure | Value |
 |---|---|
-| Items / expected issues / clean items | 176 / 76 / 106 |
+| Items / expected issues / clean items | 178 / 76 / 108 |
 | Precision | 100.0% (76 of 76) |
 | Recall | 100.0% (76 of 76) |
-| Clean items with at least one false alarm | 0.0% (0 of 106) |
+| Clean items with at least one false alarm | 0.0% (0 of 108) |
 | Correct suggestion ranked first | 100.0% (54 of 54) |
 | Correct suggestion offered at all | 100.0% |
 | "Not in dictionary" notes (not counted as errors) | 1 |
@@ -40,7 +40,7 @@ The Chuon Nath hold-out set is different: 1 in 20 dictionary entries was exclude
 | administrative | 4 | 0 | 0 | 0 | 0 |
 | general | 20 | 0 | 0 | 0 | 0 |
 | concision | 7 | 12 | 12 | 0 | 0 |
-| concision-correct | 8 | 1 | 1 | 0 | 0 |
+| concision-correct | 10 | 1 | 1 | 0 | 0 |
 
 ## Chuon Nath hold-out (false-alarm test)
 
@@ -68,4 +68,4 @@ None on the gold corpus.
 
 ## Speed
 
-A 5480-word document is analysed in 578 ms on the build machine (Node.js v22.22.0).
+A 5664-word document is analysed in 659 ms on the build machine (Node.js v22.22.0).

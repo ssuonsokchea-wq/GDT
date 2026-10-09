@@ -42,10 +42,18 @@ function registerHits(ctx, informal, insideCompounds) {
  *    verb (កើនឡើងនៃ…) breaks the sentence.
  *  - «មានការ…» at the start of a sentence has no subject; the bare verb would have none either.
  */
+const NOUN_MODIFIERS = new Set(['នៃ', 'ជា', 'ណាមួយ', 'ណា', 'ដែល', 'ដ៏', 'នេះ', 'នោះ', 'មួយ', 'ទាំងនេះ', 'ទាំងនោះ', 'ខ្លះ', 'ច្រើន', 'តិចតួច']);
+const NEGATORS = new Set(['មិន', 'ពុំ', 'គ្មាន', 'អត់']);
 function cutKeepsSentence(s, hit, p) {
-  const next = s.words[hit.j + 1];
-  if (next && next.key === 'នៃ') return false;
-  if (p.pattern.startsWith('មានការ') && hit.i === 0) return false;
+  const next = s.words[hit.j + 1], prev = s.words[hit.i - 1];
+  // A following modifier shows the phrase is a noun («ការផ្លាស់ប្ដូរជាសារវន្តណាមួយ»);
+  // cutting it to a bare verb would leave the modifier with nothing to describe.
+  if (next && NOUN_MODIFIERS.has(next.key)) return false;
+  if (p.pattern.startsWith('មានការ')) {
+    if (hit.i === 0) return false;
+    // «មិនមានការ…» denies that something exists; the bare verb changes the emphasis.
+    if (prev && NEGATORS.has(prev.key)) return false;
+  }
   return true;
 }
 

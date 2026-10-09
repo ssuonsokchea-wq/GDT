@@ -170,7 +170,7 @@ function serveStatic(req, res, url) {
     const ext = path.extname(file).toLowerCase();
     const type = TYPES[ext];
     if (!type) break;
-    const headers = { 'Content-Type': type, 'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600' };
+    const headers = { 'Content-Type': type, 'Cache-Control': 'no-cache' };
     const big = stat.size > 20000 && /json|javascript|css|svg|html/.test(type);
     if (big && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
       const key = `${file}|${stat.mtimeMs}`;
