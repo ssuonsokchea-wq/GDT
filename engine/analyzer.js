@@ -19,10 +19,11 @@ import { checkGrammar } from './rules/grammar.js';
 import { checkPunctuation } from './rules/punctuation.js';
 import { checkStyle } from './rules/style.js';
 import { checkConsistency } from './rules/consistency.js';
+import { checkMeaning } from './rules/meaning.js';
 import { wordKey } from './normalize.js';
 import { CATEGORIES, SEVERITIES, makeFinding } from './finding.js';
 
-export const ENGINE_VERSION = '1.1.2';
+export const ENGINE_VERSION = '1.2.0';
 export const MAX_TEXT_LENGTH = 300000;
 
 export const MODES = {
@@ -140,6 +141,7 @@ export function analyze(text, lexicon, options = {}) {
     ...checkPunctuation(ctx),
     ...checkStyle(ctx),
     ...checkConsistency(ctx),
+    ...checkMeaning(ctx),
   ];
   if (opts.disabledRules?.size) findings = findings.filter(f => !opts.disabledRules.has(f.ruleId));
   if (!opts.showUnverified) findings = findings.filter(f => f.category !== 'unverified');

@@ -3,7 +3,7 @@ import { CATEGORIES, SEVERITIES, CONFIDENCE_KM } from './engine/finding.js';
 import { buildReportModel, reportHtml, reportCsv } from './engine/report.js';
 import { readDocx, writeCorrectedDocx, writeTextDocx, writeReportDocx } from './engine/docx.js';
 import { extractPdfText, visualOrderScore } from './engine/pdftext.js';
-import { MODES } from './engine/analyzer.js';
+import { MODES, ENGINE_VERSION } from './engine/analyzer.js';
 import { toKhmerDigits } from './engine/chars.js';
 
 const $ = id => document.getElementById(id);
@@ -520,6 +520,7 @@ function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add
 
 // ---------- wiring ----------
 function init() {
+  $('appVersion').textContent = 'v' + ENGINE_VERSION;
   loadSettings();
   worker.postMessage({ type: 'init', lexiconUrl: LEXICON_URL, userWords: state.userWords, ncklWords: state.ncklWords });
   // While typing, offsets of old findings no longer match: show plain text until the re-check.

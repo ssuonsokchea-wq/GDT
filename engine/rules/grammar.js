@@ -32,7 +32,10 @@ function confusables(ctx, s, add) {
     const t = w[i], prev = w[i - 1], next = w[i + 1];
     if (t.key === 'និង' && prev && next) {
       const modal = MODAL_OR_ASPECT.has(next.key);
-      const subject = isPron(ctx, prev) || (isNounOnly(ctx, prev) && !isVerbish(ctx, prev));
+      // «…សប្បាយរីករាយ និងមានន័យ» coordinates two predicates: a space before និង after a
+      // word that is not a pronoun marks coordination, not the future marker នឹង.
+      const spaced = /\s/u.test(ctx.text.slice(prev.end, t.start));
+      const subject = isPron(ctx, prev) || (!spaced && isNounOnly(ctx, prev) && !isVerbish(ctx, prev));
       if (subject && (modal || isVerbOnly(ctx, next)) && !isPron(ctx, next)) {
         const evidence = lexicon.bigram('នឹង', next.key) > lexicon.bigram('និង', next.key);
         let c = isPron(ctx, prev) ? 0.75 : 0.55;
@@ -117,7 +120,12 @@ function aspect(ctx, s, add) {
   const key = sentenceKey(s);
   if (!PAST_MARKERS.some(m => key.includes(m)) || key.includes('ថា')) return;
   const w = s.words;
+  // A sentence that also names a future time («…ហើយសប្ដាហ៍ក្រោយ ខ្ញុំនឹង…») is not a conflict.
+  if (/ក្រោយ|ស្អែក|អនាគត/u.test(key)) return;
+  const pastAt = w.findIndex(x => PAST_MARKERS.some(m => x.key.includes(m)));
   for (let i = 0; i < w.length - 1; i++) {
+    // only within the clause of the past marker: a connector in between starts a new clause
+    if (i > pastAt && w.slice(pastAt + 1, i).some(x => ['ហើយ', 'ប៉ុន្តែ', 'ប៉ុន្ដែ', 'តែ', 'រួច'].includes(x.key))) break;
     if (w[i].key === 'នឹង' && !TAKES_NEUNG.has(w[i - 1]?.key) && isVerbish(ctx, w[i + 1])) {
       add({ start: w[i].start, end: w[i].end, category: 'grammar', severity: 'warning', confidence: 0.5, ruleId: 'grammar.tense-conflict',
         title: 'ពេលវេលាមិនស៊ីគ្នា',
@@ -147,7 +155,10 @@ function correlatives(ctx, s, add) {
 function questions(ctx, s, add) {
   if (s.words[0]?.key !== 'តើ') return;
   const rest = s.words.slice(1).map(x => x.key).join('');
-  if (!QUESTION_MARKERS.some(q => rest.includes(q))) {
+  // «តើអ្នកទៅមិនទៅ?»: the X មិន X form is itself the question.
+  // Checked on the joined text, because the segmenter may join «មិនទៅ» into one word.
+  const xNotX = s.words.some((x, i) => rest.includes(x.key + 'មិន' + x.key) && i > 0);
+  if (!xNotX && !QUESTION_MARKERS.some(q => rest.includes(q))) {
     add({ start: s.words[0].start, end: s.words[0].end, category: 'missing', severity: 'suggestion', confidence: 0.45, ruleId: 'missing.question-word',
       title: 'ខ្វះពាក្យសួរ',
       explanation: 'ល្បះចាប់ផ្ដើមដោយ «តើ» ប៉ុន្តែគ្មានពាក្យសួរ (ឧ. «អ្វី» «ណា» «ទេ» «ឬទេ» «ប៉ុន្មាន»)។ ពិនិត្យថាតើខ្វះពាក្យសួរ ឬ «តើ» មិនចាំបាច់។',
