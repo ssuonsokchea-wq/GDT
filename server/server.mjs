@@ -171,6 +171,9 @@ function serveStatic(req, res, url) {
     const type = TYPES[ext];
     if (!type) break;
     const headers = { 'Content-Type': type, 'Cache-Control': 'no-cache' };
+    // Earlier versions let browsers keep scripts for an hour; make sure an updated app
+    // never runs with old engine files (also the ones a background worker imports).
+    if (ext === '.html' && pathname === '/index.html') headers['Clear-Site-Data'] = '"cache"';
     const big = stat.size > 20000 && /json|javascript|css|svg|html/.test(type);
     if (big && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
       const key = `${file}|${stat.mtimeMs}`;
@@ -233,8 +236,27 @@ export function createServer() {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (!fs.existsSync(path.join(ROOT, 'public', 'vendor'))) console.warn('public/vendor is missing: run `npm install` (it copies browser libraries into public/vendor).');
-  createServer().listen(PORT, HOST, () => {
-    console.log(`KhmerProof ${ENGINE_VERSION} running at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}/`);
+  const server = createServer();
+  server.on('error', async e => {
+    if (e.code !== 'EADDRINUSE') throw e;
+    // Another program, often an older KhmerProof window, already uses the port.
+    let other = null;
+    try { other = (await (await fetch(`http://127.0.0.1:${PORT}/api/status`)).json()).version; } catch { /* not KhmerProof */ }
+    console.error('');
+    if (other) {
+      console.error(`KhmerProof ${other} is already running on port ${PORT}${other === ENGINE_VERSION ? '' : ` (this copy is ${ENGINE_VERSION})`}.`);
+      console.error('Close the other black KhmerProof window, then start this one again.');
+      console.error(`KhmerProof ${other} កំពុងដំណើរការរួចហើយ។ សូមបិទផ្ទាំងខ្មៅចាស់ រួចបើកម្ដងទៀត។`);
+    } else {
+      console.error(`Port ${PORT} is used by another program. Set another port, for example: set PORT=8081`);
+    }
+    process.exit(1);
+  });
+  server.listen(PORT, HOST, () => {
+    const url = `http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}/`;
+    console.log(`KhmerProof ${ENGINE_VERSION} running at ${url}`);
     console.log(`AI review: ${aiEnabled() ? 'enabled (' + AI_MODEL + ')' : 'off'}`);
+    // The Windows launcher asks the server to open the browser once it is really running.
+    if (process.env.KHMERPROOF_OPEN === '1' && process.platform === 'win32') execFile('cmd', ['/c', 'start', '', url]);
   });
 }

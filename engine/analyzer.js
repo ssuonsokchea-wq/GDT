@@ -23,7 +23,7 @@ import { checkMeaning } from './rules/meaning.js';
 import { wordKey } from './normalize.js';
 import { CATEGORIES, SEVERITIES, makeFinding } from './finding.js';
 
-export const ENGINE_VERSION = '1.2.0';
+export const ENGINE_VERSION = '1.2.1';
 export const MAX_TEXT_LENGTH = 300000;
 
 export const MODES = {
