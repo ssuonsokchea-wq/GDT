@@ -93,7 +93,8 @@ function render() {
 
 function renderBackdrop() {
   const text = editor.value;
-  const all = visibleFindings().filter(f => !state.filter.size || state.filter.has(group(f.category)));
+  // Sentence-level rewrites are listed but not drawn, so word-level marks stay visible.
+  const all = visibleFindings().filter(f => f.scope !== 'sentence' && (!state.filter.size || state.filter.has(group(f.category))));
   const frag = document.createDocumentFragment();
   let pos = 0;
   for (const f of all) {
@@ -163,13 +164,18 @@ function el(tag, props = {}, ...children) {
 function card(f) {
   const pct = Math.round(f.confidence * 100);
   const show = s => s.replace(/​/g, '⟨ZWSP⟩') || '∅';
-  const change = el('div', { class: 'change', lang: 'km' }, el('del', {}, show(f.original)),
-    f.suggestions.length ? ` → ${show(f.suggestions[0])}` : null);
+  const change = f.scope === 'sentence' && f.suggestions.length
+    ? el('div', { class: 'rewrite', lang: 'km' }, el('span', { class: 'tag' }, 'មុន'), el('span', { class: 'before' }, f.original),
+      el('span', { class: 'tag' }, 'ក្រោយ'), el('span', { class: 'after' }, f.suggestions[0]))
+    : el('div', { class: 'change', lang: 'km' }, el('del', {}, show(f.original)), f.suggestions.length ? ` → ${show(f.suggestions[0])}` : null);
   const actions = el('div', { class: 'actions' });
   f.suggestions.slice(0, 4).forEach((s, i) => actions.append(el('button', {
     type: 'button', title: 'ទទួលយកការកែនេះ', 'aria-label': `ទទួលយក «${s}»`,
     onclick: ev => { ev.stopPropagation(); accept(f, s); },
-  }, i === 0 ? `✓ ${show(s)}` : show(s))));
+  }, f.scope === 'sentence' ? '✓ ប្រើល្បះថ្មី' : i === 0 ? `✓ ${show(s)}` : show(s))));
+  if (state.server.ai && ['clarity', 'unnecessary', 'wording', 'structure', 'repetition'].includes(f.category)) {
+    actions.append(el('button', { type: 'button', class: 'ghost', onclick: ev => { ev.stopPropagation(); rephrase(...sentenceRange(f.start)); } }, '✦ សរសេរឡើងវិញ'));
+  }
   actions.append(el('button', { type: 'button', class: 'ghost', onclick: ev => { ev.stopPropagation(); reject(f); } }, '✕ បដិសេធ'));
   if (f.category === 'spelling' || f.category === 'unverified') {
     actions.append(el('button', { type: 'button', class: 'ghost', title: 'បន្ថែមពាក្យនេះទៅសទ្ទានុក្រមផ្ទាល់ខ្លួន', onclick: ev => { ev.stopPropagation(); addUserWord(f.original); } }, '+ សទ្ទានុក្រម'));
@@ -407,6 +413,64 @@ async function aiReview() {
   }
 }
 
+// ---------- AI rephrasing ----------
+/** The sentence around an offset: from the previous to the next ។ ៕ ? ! or line break. */
+function sentenceRange(at) {
+  const t = editor.value;
+  let s = at, e = at;
+  while (s > 0 && !/[\u17D4\u17D5?!\n]/u.test(t[s - 1])) s--;
+  while (e < t.length && !/[\u17D4\u17D5?!\n]/u.test(t[e])) e++;
+  if (e < t.length && t[e] !== '\n') e++;
+  while (s < e && /\s/u.test(t[s])) s++;
+  return [s, e];
+}
+
+async function rephrase(start, end) {
+  if (start === undefined) {
+    [start, end] = editor.selectionStart !== editor.selectionEnd ? [editor.selectionStart, editor.selectionEnd] : sentenceRange(editor.selectionStart);
+  }
+  const passage = editor.value.slice(start, end);
+  if (!passage.trim()) { toast('ជ្រើសអត្ថបទ ឬដាក់ទស្សន៍ទ្រនិចក្នុងល្បះ ដែលចង់សរសេរឡើងវិញ។'); return; }
+  if (passage.length > 1500) { toast('សូមជ្រើសអត្ថបទខ្លីជាង ១៥០០ តួអក្សរ។'); return; }
+  if (!state.aiConsent) {
+    const legal = state.mode === 'legal' ? ' របៀបច្បាប់៖ KhmerProof នឹងបោះបង់សំណើណាដែលប្ដូរពាក្យកំណត់ន័យច្បាប់។' : '';
+    if (!await consent(`ល្បះដែលអ្នកជ្រើសនឹងត្រូវផ្ញើទៅម៉ាស៊ីនមេ KhmerProof និងទៅ Anthropic (Claude) ដើម្បីសរសេរឡើងវិញ។ កុំផ្ញើឯកសារសម្ងាត់ ដែលអ្នកគ្មានការអនុញ្ញាត។${legal}`)) return;
+    state.aiConsent = true;
+  }
+  const d = $('rephraseDialog'), box = $('rephraseOptions');
+  $('rephraseOriginal').textContent = passage;
+  box.replaceChildren(el('p', { class: 'hint' }, 'កំពុងសរសេរឡើងវិញ…'));
+  d.showModal();
+  try {
+    const res = await fetch('./api/rephrase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: passage, mode: state.mode }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    if (!data.alternatives.length) { box.replaceChildren(el('p', {}, data.note || 'រកមិនឃើញសំណើដែលឆ្លងការពិនិត្យរបស់ KhmerProof ទេ។')); return; }
+    box.replaceChildren(...data.alternatives.map(a => el('div', { class: 'rephrase-option' },
+      el('span', { class: 'label' }, a.styleKm || 'សំណើ'), el('div', { class: 'text', lang: 'km' }, a.text),
+      el('p', {}, a.explanation), a.meaningMarkersChanged ? el('p', { class: 'legal-note' }, 'ប្រយ័ត្ន៖ សំណើនេះប្ដូរពាក្យដូចជា «មិន» «ត្រូវ» «អាច» «និង/ឬ» ដែលអាចប្ដូរន័យ។') : null,
+      el('div', { class: 'actions' }, el('button', { type: 'button', onclick: () => useRephrase(start, end, passage, a, d) }, '✓ ប្រើ')))));
+  } catch (e) {
+    box.replaceChildren(el('p', {}, 'មិនអាចសរសេរឡើងវិញបាន៖ ' + e.message));
+  }
+}
+
+function useRephrase(start, end, passage, alt, dialog) {
+  if (editor.value.slice(start, end) !== passage) { toast('អត្ថបទបានផ្លាស់ប្ដូរ។ សូមសាកម្ដងទៀត។'); dialog.close(); return; }
+  pushUndo();
+  editor.setRangeText(alt.text, start, end, 'preserve');
+  const before = editor.value.slice(0, start);
+  state.decisions.push({ status: 'accepted', replacement: alt.text, at: new Date().toISOString(), finding: {
+    id: 'RW', start, end: start + passage.length, original: passage, context: passage, contextOffset: 0, category: 'clarity', severity: 'suggestion',
+    confidence: 0.5, confidenceLevel: 'low', ruleId: 'ai.rephrase', title: 'សរសេរឡើងវិញដោយ AI', explanation: alt.explanation, suggestions: [alt.text],
+    source: { id: 'ai', km: 'ការសរសេរឡើងវិញដោយម៉ូដែល AI (ពិនិត្យដោយអ្នកប្រើ)', en: 'AI rephrasing, accepted by the user' },
+    location: { line: before.split('\n').length, column: start - before.lastIndexOf('\n'), paragraph: before.split(/\n\s*\n/).length },
+  } });
+  dialog.close();
+  check();
+  toast('បានប្ដូរ។ អាចចុច «ត្រឡប់» ដើម្បីលុបចោល។');
+}
+
 // ---------- settings ----------
 function parseTermRules(s) {
   return s.split('\n').map(l => l.split('=')).filter(p => p.length === 2 && p[0].trim())
@@ -471,6 +535,9 @@ function init() {
   $('clearBtn').onclick = () => { clearNotices(); setDocument('', null); };
   $('undoBtn').onclick = undo;
   $('aiBtn').onclick = aiReview;
+  $('rephraseBtn').onclick = () => rephrase();
+  // keep the selection: pressing the button must not move the caret first
+  $('rephraseBtn').addEventListener('mousedown', e => e.preventDefault());
   document.querySelectorAll('[data-export]').forEach(b => { b.onclick = () => exportAs(b.dataset.export); });
   $('confFilter').onchange = e => { state.minConf = Number(e.target.value); render(); };
   $('showUnverified').onchange = e => { state.showUnverified = e.target.checked; render(); };
@@ -496,6 +563,8 @@ function init() {
     if (!s) return;
     state.server = { pdf: !!s.pdf, ai: !!s.ai, pdfText: !!s.pdfText };
     $('aiBtn').hidden = !s.ai;
+    $('rephraseBtn').hidden = !s.ai;
+    render();
   }).catch(() => {});
   render();
 }

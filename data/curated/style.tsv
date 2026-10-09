@@ -1,14 +1,32 @@
 # pattern	replacement	category	modes	confidence	explanation (Khmer)
 # Project-curated verbose or redundant phrasings and contradictory combinations.
 # category: wording (unnecessary words), grammar (contradiction)
-ធ្វើការសិក្សា	សិក្សា	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «សិក្សា» គ្រប់គ្រាន់ ហើយសំណេរខ្លីច្បាស់ជាង។
-ធ្វើការពិនិត្យ	ពិនិត្យ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ពិនិត្យ» គ្រប់គ្រាន់។
-ធ្វើការប្រជុំ	ប្រជុំ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ប្រជុំ» គ្រប់គ្រាន់។
-ធ្វើការស្រាវជ្រាវ	ស្រាវជ្រាវ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ស្រាវជ្រាវ» គ្រប់គ្រាន់។
-ធ្វើការវាយតម្លៃ	វាយតម្លៃ	wording	academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «វាយតម្លៃ» គ្រប់គ្រាន់។
+ធ្វើការសិក្សា	សិក្សា	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «សិក្សា» គ្រប់គ្រាន់ ហើយសំណេរខ្លីច្បាស់ជាង។
+ធ្វើការពិនិត្យ	ពិនិត្យ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ពិនិត្យ» គ្រប់គ្រាន់។
+ធ្វើការប្រជុំ	ប្រជុំ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ប្រជុំ» គ្រប់គ្រាន់។
+ធ្វើការស្រាវជ្រាវ	ស្រាវជ្រាវ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ស្រាវជ្រាវ» គ្រប់គ្រាន់។
+ធ្វើការវាយតម្លៃ	វាយតម្លៃ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «វាយតម្លៃ» គ្រប់គ្រាន់។
 ហើយនិង	និង	wording	academic,government,administrative,legal	low	«ហើយនិង» ប្រើពាក្យភ្ជាប់ពីរដែលមានមុខងារដូចគ្នា។ ក្នុងសំណេរផ្លូវការ «និង» តែមួយគ្រប់គ្រាន់។
 ជាងបំផុត	បំផុត	grammar	general,academic,government,administrative,legal	medium	«ជាង» (ប្រៀបធៀប) និង «បំផុត» (កម្រិតខ្ពស់បំផុត) មិនប្រើជាប់គ្នាទេ។ ជ្រើសរើសមួយ៖ «...ជាងគេ» ឬ «...បំផុត»។
 ទាំងអស់ទាំងអស់	ទាំងអស់	wording	general,academic,government,administrative,legal	high	«ទាំងអស់» ត្រូវបានសរសេរដដែលពីរដង។
 បាននឹង	នឹងបាន	grammar	general,academic,government,administrative,legal	low	លំដាប់ពាក្យជំនួយកិរិយា៖ សញ្ញាអនាគត «នឹង» ជាធម្មតានៅមុខ «បាន» (ឧ. «នឹងបានទទួល»)។
 ផងដែល	ផងដែរ	spelling	general,academic,government,administrative,legal	high	ពាក្យបញ្ចប់ «ផងដែរ» ប្រើ «ដែរ» (ដូចគ្នា) មិនមែន «ដែល» (ពាក្យភ្ជាប់) ទេ។
 ដូចគ្នាដែល	ដូចគ្នាដែរ	spelling	general,academic,government,administrative,legal	medium	នៅទីនេះត្រូវការ «ដែរ» (ន័យថា ដូចគ្នា/ផង) មិនមែន «ដែល» ទេ។
+ធ្វើការពិភាក្សា	ពិភាក្សា	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ពិភាក្សា» គ្រប់គ្រាន់ ហើយល្បះខ្លីជាង ដោយន័យនៅដដែល។
+ធ្វើការសម្រេចចិត្ត	សម្រេចចិត្ត	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «សម្រេចចិត្ត» គ្រប់គ្រាន់។
+ធ្វើការផ្សព្វផ្សាយ	ផ្សព្វផ្សាយ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ផ្សព្វផ្សាយ» គ្រប់គ្រាន់។
+ធ្វើការត្រួតពិនិត្យ	ត្រួតពិនិត្យ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «ត្រួតពិនិត្យ» គ្រប់គ្រាន់។
+ធ្វើការវិភាគ	វិភាគ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «វិភាគ» គ្រប់គ្រាន់។
+ធ្វើការរៀបចំ	រៀបចំ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «រៀបចំ» គ្រប់គ្រាន់។
+ធ្វើការកែលម្អ	កែលម្អ	wording	general,academic,government,administrative,legal	low	«ធ្វើការ» នៅទីនេះមិនចាំបាច់ទេ។ កិរិយាសព្ទ «កែលម្អ» គ្រប់គ្រាន់។
+មានការកើនឡើង	កើនឡើង	wording	general,academic,government,administrative,legal	low	«មានការ» ធ្វើឱ្យល្បះវែង។ ប្រើកិរិយាសព្ទ «កើនឡើង» ផ្ទាល់ ខ្លី និងច្បាស់ជាង (ឧ. «តម្លៃកើនឡើង»)។
+មានការថយចុះ	ថយចុះ	wording	general,academic,government,administrative,legal	low	«មានការ» ធ្វើឱ្យល្បះវែង។ ប្រើកិរិយាសព្ទ «ថយចុះ» ផ្ទាល់ ខ្លី និងច្បាស់ជាង។
+មានការប្រែប្រួល	ប្រែប្រួល	wording	general,academic,government,administrative,legal	low	«មានការ» ធ្វើឱ្យល្បះវែង។ ប្រើកិរិយាសព្ទ «ប្រែប្រួល» ផ្ទាល់ ខ្លី និងច្បាស់ជាង។
+មានការរីកចម្រើន	រីកចម្រើន	wording	general,academic,government,administrative,legal	low	«មានការ» ធ្វើឱ្យល្បះវែង។ ប្រើកិរិយាសព្ទ «រីកចម្រើន» ផ្ទាល់ ខ្លី និងច្បាស់ជាង។
+មានការផ្លាស់ប្ដូរ	ផ្លាស់ប្ដូរ	wording	general,academic,government,administrative,legal	low	«មានការ» ធ្វើឱ្យល្បះវែង។ ប្រើកិរិយាសព្ទ «ផ្លាស់ប្ដូរ» ផ្ទាល់ ខ្លី និងច្បាស់ជាង។
+ដើម្បីនឹង	ដើម្បី	wording	general,academic,government,administrative,legal	medium	«នឹង» មិនចាំបាច់នៅក្រោយ «ដើម្បី» ទេ។ សរសេរ «ដើម្បី» តែមួយ (ឧ. «ដើម្បីទៅ»)។
+ក្នុងគោលបំណងដើម្បី	ដើម្បី	wording	general,academic,government,administrative,legal	low	«ក្នុងគោលបំណង» និង «ដើម្បី» មានន័យដូចគ្នា។ «ដើម្បី» តែមួយគ្រប់គ្រាន់ ហើយខ្លីជាង។
+ប្រសិនបើសិនជា	ប្រសិនបើ	wording	general,academic,government,administrative,legal	medium	«ប្រសិនបើ» និង «សិនជា» មានន័យដូចគ្នា។ ប្រើតែ «ប្រសិនបើ»។
+ក្នុងពេលបច្ចុប្បន្ននេះ	បច្ចុប្បន្ននេះ	wording	general,academic,government,administrative,legal	low	«ក្នុងពេល» មិនចាំបាច់ទេ។ «បច្ចុប្បន្ននេះ» គ្រប់គ្រាន់ ហើយខ្លីជាង។
+សហការជាមួយគ្នា	សហការគ្នា	wording	general,academic,government,administrative,legal	low	«សហការ» មានន័យថាធ្វើជាមួយគ្នារួចហើយ។ «សហការគ្នា» ខ្លី និងគ្រប់គ្រាន់។
+ជាថ្មីម្ដងទៀត	ម្ដងទៀត	wording	general,academic,government,administrative,legal	low	«ជាថ្មី» និង «ម្ដងទៀត» មានន័យដូចគ្នា។ ប្រើតែមួយ។

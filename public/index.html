@@ -49,6 +49,7 @@
   <button type="button" id="undoBtn" class="ghost" disabled>↶ ត្រឡប់</button>
   <button type="button" id="clearBtn" class="ghost">សម្អាត</button>
   <button type="button" id="aiBtn" class="ghost" hidden>✦ ពិនិត្យបរិបទ (AI)</button>
+  <button type="button" id="rephraseBtn" class="ghost" hidden title="ជ្រើសអត្ថបទ ឬដាក់ទស្សន៍ទ្រនិចក្នុងល្បះ រួចចុចប៊ូតុងនេះ">✦ សរសេរឡើងវិញ</button>
   <span class="spacer"></span>
   <details class="menu" id="exportMenu">
     <summary>⬇ ទាញយក</summary>
@@ -137,6 +138,17 @@
       <button value="cancel" class="ghost">បោះបង់</button>
       <button value="ok" id="consentOk" disabled>បន្ត</button>
     </div>
+  </form>
+</dialog>
+
+<dialog id="rephraseDialog" aria-labelledby="rephraseTitle">
+  <form method="dialog" class="dialog-body">
+    <h2 id="rephraseTitle">សំណើសរសេរឡើងវិញ</h2>
+    <p class="hint">អត្ថបទដើម៖</p>
+    <blockquote id="rephraseOriginal" class="quote" lang="km"></blockquote>
+    <div id="rephraseOptions" class="rephrase-options" aria-live="polite"></div>
+    <p class="hint">សំណើទាំងនេះមកពី AI ហើយត្រូវបានពិនិត្យអក្ខរាវិរុទ្ធដោយ KhmerProof។ សូមអានឱ្យប្រាកដថាន័យនៅដដែល មុនប្រើ។</p>
+    <div class="dialog-actions"><button value="cancel" class="ghost">បិទ</button></div>
   </form>
 </dialog>
 

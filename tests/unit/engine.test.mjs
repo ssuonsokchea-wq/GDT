@@ -109,7 +109,8 @@ test('handles empty, Latin-only and very long input', () => {
   const t0 = Date.now();
   const r = analyze(long, lexicon);
   assert.ok(Date.now() - t0 < 5000, 'a 9,000-word text is analysed within 5 s');
-  assert.equal(r.findings.filter(f => f.severity !== 'info').length, 0);
+  // 3,000 sentences that all start with ខ្ញុំ: only the monotony note is expected
+  assert.deepEqual([...new Set(r.findings.filter(f => f.severity !== 'info').map(f => f.ruleId))], ['repetition.sentence-openings']);
   assert.throws(() => analyze('ក'.repeat(400001), lexicon), /exceeds/);
 });
 

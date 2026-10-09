@@ -42,3 +42,33 @@ test('legal mode marks every AI finding for human review', () => {
   assert.equal(out[0].humanReview, true);
   assert.match(out[0].legalNote, /AI/);
 });
+
+import { validateRephrase } from '../../server/ai-review.mjs';
+import { analyze } from '../../engine/node.js';
+
+test('rephrase validation drops misspellings, changed numbers, and (in legal mode) changed meaning markers', () => {
+  const passage = 'ភាគីទីមួយត្រូវបង់ប្រាក់ក្នុងរយៈពេល ៣០ ថ្ងៃ។';
+  const alts = [
+    { text: 'ភាគីទីមួយត្រូវទូទាត់ប្រាក់ក្នុងរយៈពេល ៣០ ថ្ងៃ។', style: 'clearer', explanation_km: 'ok' },
+    { text: 'ភាគីទីមួយត្រូវបង់ប្រាក់ក្នុងរយៈពេល ៦០ ថ្ងៃ។', style: 'clearer', explanation_km: 'number changed' },
+    { text: 'ភាគីទីមួយអាចបង់ប្រាក់ក្នុងរយៈពេល ៣០ ថ្ងៃ។', style: 'shorter', explanation_km: 'obligation → permission' },
+    { text: 'ភាគីទីមួយត្រូវបង់ប្រាក់ខ្ងុំក្នុងរយៈពេល ៣០ ថ្ងៃ។', style: 'more_formal', explanation_km: 'misspelling' },
+  ];
+  assert.deepEqual(validateRephrase(passage, 'legal', alts, lexicon).map(a => a.text), [alts[0].text]);
+  const general = validateRephrase(passage, 'general', alts, lexicon);
+  assert.ok(general.some(a => a.text === alts[2].text && a.meaningMarkersChanged), 'general mode keeps it but warns');
+});
+
+test('a sentence with several wordy phrases gets one combined rewrite', () => {
+  const r = analyze('ក្នុងពេលបច្ចុប្បន្ននេះ តម្លៃប្រេងមានការកើនឡើង ដើម្បីនឹងដោះស្រាយ ក្រុមការងារបានធ្វើការពិភាក្សាជាថ្មីម្ដងទៀត។', lexicon);
+  const rw = r.findings.find(f => f.ruleId === 'clarity.rewrite');
+  assert.equal(rw.suggestions[0], 'បច្ចុប្បន្ននេះ តម្លៃប្រេងកើនឡើង ដើម្បីដោះស្រាយ ក្រុមការងារបានពិភាក្សាម្ដងទៀត។');
+  assert.equal(rw.scope, 'sentence');
+});
+
+test('a long sentence gets a concrete place to split it', () => {
+  const long = 'ក្រសួងអប់រំ យុវជន និងកីឡា បានរៀបចំកិច្ចប្រជុំពិគ្រោះយោបល់ជាមួយគ្រូបង្រៀន នាយកសាលា និងតំណាងសហគមន៍ នៅខេត្តសៀមរាប និងខេត្តបាត់ដំបង ដើម្បីពិនិត្យលទ្ធផលនៃកម្មវិធីអប់រំឆ្នាំមុន ហើយអ្នកចូលរួមបានលើកឡើងអំពីបញ្ហាខ្វះគ្រូ ខ្វះសម្ភារៈសិក្សា និងការធ្វើដំណើរឆ្ងាយរបស់សិស្សនៅតំបន់ជនបទ ព្រមទាំងបានស្នើឱ្យក្រសួងបង្កើនថវិកាសម្រាប់សាលារៀនតូចៗ។';
+  const f = analyze(long, lexicon).findings.find(x => x.ruleId === 'clarity.split-sentence');
+  assert.equal(f.original, 'ឆ្នាំមុន ហើយ');
+  assert.equal(f.suggestions[0], 'ឆ្នាំមុន។ ');
+});

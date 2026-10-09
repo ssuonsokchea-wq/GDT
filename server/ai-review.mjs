@@ -10,7 +10,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
-import { analyze } from '../engine/analyzer.js';
+import { analyze, meaningSignature } from '../engine/analyzer.js';
 import { makeFinding, CATEGORIES } from '../engine/finding.js';
 import { locator } from '../engine/tokenize.js';
 
@@ -126,6 +126,77 @@ export function validate(text, mode, items, lexicon) {
     f.contextOffset = at - Math.max(0, at - 40);
     if (mode === 'legal') f.legalNote = 'របៀបច្បាប់៖ សំណើពី AI ត្រូវតែពិនិត្យដោយអ្នកជំនាញ មុនទទួលយក។';
     out.push(f);
+  }
+  return out;
+}
+
+// ---------- Rephrasing: clearer alternatives for one passage ----------
+
+export const REPHRASE_MAX_CHARS = 1500;
+
+const REPHRASE_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['alternatives'],
+  properties: {
+    alternatives: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['text', 'style', 'explanation_km'],
+        properties: {
+          text: { type: 'string', description: 'The rewritten passage, complete, in Khmer.' },
+          style: { type: 'string', enum: ['clearer', 'shorter', 'more_formal'] },
+          explanation_km: { type: 'string', description: 'One sentence in Khmer saying what changed and why it reads better.' },
+        },
+      },
+    },
+  },
+};
+const RephraseSchema = z.object({ alternatives: z.array(z.object({ text: z.string(), style: z.string(), explanation_km: z.string() })) });
+
+const STYLE_KM = { clearer: 'ច្បាស់ជាង', shorter: 'ខ្លីជាង', more_formal: 'ផ្លូវការជាង' };
+
+/** Ask for up to three clearer versions of a passage; every one is checked locally. */
+export async function aiRephrase(passage, mode, lexicon) {
+  if (!aiEnabled()) throw Object.assign(new Error('AI review is not enabled on this server'), { status: 503 });
+  passage = String(passage || '').trim();
+  if (!passage) throw Object.assign(new Error('Nothing to rephrase'), { status: 400 });
+  if (passage.length > REPHRASE_MAX_CHARS) throw Object.assign(new Error(`Select at most ${REPHRASE_MAX_CHARS} characters`), { status: 413 });
+  const client = new Anthropic({ maxRetries: 1, timeout: 120000 });
+  const response = await client.beta.messages.create({
+    model: AI_MODEL,
+    max_tokens: 8000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: { effort: 'medium', format: { type: 'json_schema', schema: REPHRASE_SCHEMA } },
+    system: `You are an experienced Khmer editor. Rewrite the passage the user gives you so that it reads clearly and naturally in Modern Standard Khmer. Keeping the full meaning comes first, readability second, brevity last: never drop information, nuance, emphasis or politeness markers just to make the text shorter. Offer up to three alternatives that differ in a useful way: one clearer, one shorter only if nothing is lost, one more formal (skip any that would not differ or would lose meaning). Keep names, numbers, dates and quoted terms exactly as written. Use standard spelling. Writing mode: ${MODE_NOTES[mode] || MODE_NOTES.general}`,
+    messages: [{ role: 'user', content: `<passage>\n${passage}\n</passage>` }],
+  });
+  if (response.stop_reason === 'refusal') return { alternatives: [], note: 'The model declined this passage.' };
+  const block = response.content.find(b => b.type === 'text');
+  let parsed;
+  try { parsed = RephraseSchema.parse(JSON.parse(block?.text ?? '')); } catch { return { alternatives: [], note: 'The model returned an invalid result.' }; }
+  return { alternatives: validateRephrase(passage, mode, parsed.alternatives, lexicon), model: response.model };
+}
+
+/** Keep only alternatives that add no spelling errors and, in legal mode, keep the legal meaning markers. */
+export function validateRephrase(passage, mode, alternatives, lexicon) {
+  const baseErrors = analyze(passage, lexicon, { mode }).findings.filter(f => f.category === 'spelling' && f.severity === 'error').length;
+  const sig = meaningSignature(passage);
+  const numbers = s => (s.match(/[0-9០-៩]+/gu) || []).sort().join(',');
+  const out = [];
+  for (const a of alternatives.slice(0, 3)) {
+    const text = String(a.text || '').trim();
+    if (!text || text === passage || text.length > passage.length * 2 + 40) continue;
+    if (!/[ក-៿]/u.test(text)) continue;
+    if (numbers(text) !== numbers(passage)) continue; // numbers must survive any rewrite
+    const errors = analyze(text, lexicon, { mode }).findings.filter(f => f.category === 'spelling' && f.severity === 'error').length;
+    if (errors > baseErrors) continue;
+    const meaningKept = meaningSignature(text) === sig;
+    if (mode === 'legal' && !meaningKept) continue;
+    out.push({ text, style: a.style, styleKm: STYLE_KM[a.style] || '', explanation: String(a.explanation_km || '').slice(0, 400), meaningMarkersChanged: !meaningKept });
   }
   return out;
 }

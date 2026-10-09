@@ -36,6 +36,19 @@ function registerHits(ctx, informal, insideCompounds) {
   return out;
 }
 
+/**
+ * A cut must leave a readable sentence with the same meaning, not merely a shorter one.
+ *  - Before នៃ the phrase is a noun head (មានការកើនឡើងនៃចំនួនសិស្ស); cutting it to a bare
+ *    verb (កើនឡើងនៃ…) breaks the sentence.
+ *  - «មានការ…» at the start of a sentence has no subject; the bare verb would have none either.
+ */
+function cutKeepsSentence(s, hit, p) {
+  const next = s.words[hit.j + 1];
+  if (next && next.key === 'នៃ') return false;
+  if (p.pattern.startsWith('មានការ') && hit.i === 0) return false;
+  return true;
+}
+
 const views = new WeakMap();
 function authoritativeView(lexicon) {
   if (!views.has(lexicon)) {
@@ -66,6 +79,7 @@ export function checkStyle(ctx) {
   for (const p of lexicon.curated.style || []) {
     if (!p.modes.includes(mode)) continue;
     for (const s of sentences) for (const hit of findPhrase(s, p.pattern)) {
+      if (p.category === 'wording' && !cutKeepsSentence(s, hit, p)) continue;
       add({ start: hit.start, end: hit.end, category: p.category === 'wording' ? 'unnecessary' : p.category, severity: p.category === 'wording' ? 'suggestion' : 'error',
         confidence: p.confidence, ruleId: `style.phrase`, title: p.category === 'wording' ? 'ពាក្យលើស' : p.category === 'spelling' ? 'ច្រឡំពាក្យ' : 'ការប្រើពាក្យផ្ទុយគ្នា',
         explanation: p.explanation, suggestions: [p.replacement], source: p.category === 'grammar' || p.category === 'spelling' ? 'project-grammar' : 'project-style',

@@ -28,7 +28,7 @@ test.before(async () => {
   await page.goto(base);
   await page.waitForFunction(() => /វចនានុក្រម|ពិនិត្យរួច/.test(document.getElementById('engineStatus').textContent), null, { timeout: 30000 });
 });
-test.after(async () => { await browser?.close(); server?.close(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(async () => { await browser?.close(); server?.closeAllConnections(); server?.close(); fs.rmSync(tmp, { recursive: true, force: true }); });
 
 async function typeText(text) {
   await page.fill('#editor', text);

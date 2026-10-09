@@ -20,7 +20,7 @@ import { checkPunctuation } from './rules/punctuation.js';
 import { checkStyle } from './rules/style.js';
 import { checkConsistency } from './rules/consistency.js';
 import { wordKey } from './normalize.js';
-import { CATEGORIES, SEVERITIES } from './finding.js';
+import { CATEGORIES, SEVERITIES, makeFinding } from './finding.js';
 
 export const ENGINE_VERSION = '1.0.0';
 export const MAX_TEXT_LENGTH = 300000;
@@ -46,7 +46,7 @@ const MEANING_CLASS = new Map([
 ]);
 const MEANING_RE = new RegExp([...MEANING_CLASS.keys()].sort((a, b) => b.length - a.length).join('|'), 'gu');
 
-function meaningSignature(s) {
+export function meaningSignature(s) {
   const parts = [];
   const k = wordKey(s);
   for (const m of k.matchAll(MEANING_RE)) parts.push(MEANING_CLASS.get(m[0]));
@@ -67,6 +67,53 @@ function applyLegalGuard(f) {
       : 'របៀបច្បាប់៖ នេះជាសំណើកែប្រែពាក្យពេចន៍។ KhmerProof មិនកែដោយស្វ័យប្រវត្តិទេ ដើម្បីរក្សាន័យច្បាប់ដើម។';
   }
   return f;
+}
+
+// Edits that may be combined into one rewritten sentence: cuts of wordy phrases, sentence
+// splits, and corrections that are safe on their own.
+const REWRITE_CATEGORIES = new Set(['unnecessary', 'clarity', 'repetition', 'spelling', 'punctuation', 'unicode']);
+const REWRITE_TRIGGERS = new Set(['style.phrase', 'clarity.split-sentence']);
+
+/**
+ * When a sentence has two or more applicable edits, at least one of which shortens or
+ * splits it, offer the whole sentence with every edit applied, so the writer can see
+ * and accept the clearer version in one step. Each part is still listed separately.
+ */
+function sentenceRewrites(text, sentences, findings, opts, lexicon) {
+  const out = [];
+  for (const s of sentences) {
+    const start = s.words[0].start, end = s.tokens[s.tokens.length - 1].end;
+    const edits = findings
+      .filter(f => f.start >= start && f.end <= end && f.suggestions.length && REWRITE_CATEGORIES.has(f.category))
+      .filter(f => (f.category !== 'spelling' && f.category !== 'punctuation') || f.autoFixSafe || f.confidence >= 0.8)
+      .sort((a, b) => a.start - b.start);
+    const chosen = [];
+    for (const f of edits) if (!chosen.length || f.start >= chosen[chosen.length - 1].end) chosen.push(f);
+    if (chosen.length < 2 || !chosen.some(f => REWRITE_TRIGGERS.has(f.ruleId))) continue;
+    let rewritten = '', pos = start;
+    for (const f of chosen) { rewritten += text.slice(pos, f.start) + f.suggestions[0]; pos = f.end; }
+    rewritten += text.slice(pos, end);
+    // Offer the rewrite only if it reads as cleanly as each edit promised: re-check it, and
+    // require that it keeps every meaning marker (negation, obligation, and/or, numbers,
+    // quoted terms) of the original. A future marker removed by «ដើម្បីនឹង → ដើម្បី» is the
+    // one listed exception, because នឹង adds nothing after ដើម្បី.
+    const recheck = analyze(rewritten, lexicon, { ...opts, _recheck: true, showUnverified: false }).findings
+      .filter(f => f.severity === 'error' || f.severity === 'warning');
+    if (recheck.length) continue;
+    const sigOf = t => meaningSignature(t.replace(/ដើម្បីនឹង/gu, 'ដើម្បី'));
+    if (sigOf(text.slice(start, end)) !== sigOf(rewritten)) continue;
+    const saved = [...text.slice(start, end)].length - [...rewritten].length;
+    out.push(makeFinding(text, {
+      start, end, category: 'clarity', severity: 'suggestion', confidence: Math.min(0.6, ...chosen.map(f => f.confidence)),
+      ruleId: 'clarity.rewrite', layer: 'style', title: 'សំណើសរសេរល្បះឡើងវិញ ឱ្យខ្លី និងច្បាស់',
+      explanation: `កែ ${chosen.length} កន្លែងក្នុងល្បះនេះក្នុងពេលតែមួយ${saved > 0 ? ` (ខ្លីជាងមុន ${saved} តួអក្សរ)` : ''} ដោយរក្សាន័យដើម៖ ` +
+        chosen.map(f => `«${f.original.trim()}» → «${f.suggestions[0].trim()}»`).join('; ') + '។ ការកែនីមួយៗក៏មាននៅក្នុងបញ្ជីដាច់ដោយឡែកដែរ។',
+      suggestions: [rewritten], source: 'project-style', autoFixSafe: false,
+    }));
+    out[out.length - 1].scope = 'sentence';
+    if (opts.mode === 'legal') applyLegalGuard(out[out.length - 1]);
+  }
+  return out;
 }
 
 const LAYER_PRIORITY = { spelling: 0, normalization: 1, grammar: 2, punctuation: 3, style: 4, terminology: 5 };
@@ -109,6 +156,7 @@ export function analyze(text, lexicon, options = {}) {
     if (better) { seen.set(k, f); f.alsoFlaggedBy = prev.ruleId; } else prev.alsoFlaggedBy = f.ruleId;
   }
   findings = [...seen.values()];
+  if (!opts._recheck) findings.push(...sentenceRewrites(text, sentences, findings, opts, lexicon));
   findings.sort((a, b) => a.start - b.start || SEVERITIES[a.severity].rank - SEVERITIES[b.severity].rank || b.end - a.end);
 
   const loc = locator(text);

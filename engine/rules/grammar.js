@@ -187,13 +187,52 @@ function wordOrder(ctx, s, add) {
   }
 }
 
+const LONG_SENTENCE = 40;
+// Clause connectors where a long sentence can end and a new one begin. For ហើយ ("and
+// then") the full stop replaces the connector; the others start the new sentence.
+const SPLIT_AT = new Map([['ហើយ', true], ['ប៉ុន្តែ', false], ['ប៉ុន្ដែ', false], ['ដូច្នេះ', false], ['ដោយហេតុនេះ', false], ['លើសពីនេះ', false], ['ម្យ៉ាងទៀត', false]]);
+
+/** The connector nearest the middle of a long sentence, with at least 8 words on each side. */
+function splitPoint(ctx, s) {
+  const w = s.words;
+  let best = null;
+  for (let i = 8; i < w.length - 8; i++) {
+    const t = w[i];
+    if (!SPLIT_AT.has(t.key)) continue;
+    const gap = ctx.text.slice(w[i - 1].end, t.start);
+    if (!/^[ \t\u200B]+$/u.test(gap)) continue; // a connector is set off by a space; ធ្វើរួចហើយ is not
+    // The new sentence needs its own subject. «…ហើយទិញត្រី» continues the same subject, so
+    // splitting there would leave «ទិញត្រី។» without one.
+    const next = w[i + 1];
+    if (!next || !(isPron(ctx, next) || (has(posOf(ctx, next), POS.N) && !isVerbOnly(ctx, next) && !MODAL_OR_ASPECT.has(next.key)))) continue;
+    const dist = Math.abs(i - w.length / 2);
+    if (!best || dist < best.dist) best = { i, dist };
+  }
+  if (!best) return null;
+  const t = w[best.i], prev = w[best.i - 1];
+  const drop = SPLIT_AT.get(t.key);
+  // Replace "prev␣connector" with "prev។␣connector" (or "prev។" when the connector is dropped)
+  const start = prev.start, end = drop ? w[best.i + 1].start : t.end;
+  const replacement = drop ? `${prev.text}។ ` : `${prev.text}។ ${t.text}`;
+  return { start, end, replacement, word: t, drop };
+}
+
 function clarity(ctx, s, add) {
   const w = s.words;
-  if (w.length > 45) {
-    add({ start: w[0].start, end: w[Math.min(w.length - 1, 5)].end, category: 'clarity', severity: 'suggestion', confidence: 0.5, ruleId: 'clarity.long-sentence',
-      title: 'ល្បះវែងពេក',
-      explanation: `ល្បះនេះមានប្រហែល ${w.length} ពាក្យ ដោយគ្មានខណ្ឌសញ្ញា។ ល្បះវែងពិបាកអាន ហើយងាយយល់ច្រឡំ។ ពិចារណាបំបែកជាល្បះខ្លីៗ។`,
-      suggestions: [], source: 'project-style' });
+  if (w.length > LONG_SENTENCE) {
+    const split = splitPoint(ctx, s);
+    if (split) {
+      add({ start: split.start, end: split.end, category: 'clarity', severity: 'suggestion', confidence: 0.45, ruleId: 'clarity.split-sentence',
+        title: 'ល្បះវែងពេក៖ អាចបំបែកនៅទីនេះ',
+        explanation: `ល្បះនេះមានប្រហែល ${w.length} ពាក្យ។ ល្បះវែងពិបាកអាន។ «${split.word.text}» ចាប់ផ្ដើមឃ្លាថ្មីដែលមានប្រធានផ្ទាល់ខ្លួន ដូច្នេះអាចបញ្ចប់ល្បះទីមួយនៅទីនេះ ហើយចាប់ផ្ដើមល្បះថ្មី ដោយន័យនៅដដែល។` +
+          (split.drop ? ` ពាក្យ «${split.word.text}» អាចលុបចេញ ព្រោះខណ្ឌសញ្ញា «។» ជំនួសមុខងាររបស់វា។` : ''),
+        suggestions: [split.replacement], source: 'project-style', autoFixSafe: false });
+    } else {
+      add({ start: w[0].start, end: w[Math.min(w.length - 1, 5)].end, category: 'clarity', severity: 'suggestion', confidence: 0.5, ruleId: 'clarity.long-sentence',
+        title: 'ល្បះវែងពេក',
+        explanation: `ល្បះនេះមានប្រហែល ${w.length} ពាក្យ ដោយគ្មានខណ្ឌសញ្ញា។ ល្បះវែងពិបាកអាន ហើយងាយយល់ច្រឡំ។ ពិចារណាបំបែកជាល្បះខ្លីៗ។`,
+        suggestions: [], source: 'project-style' });
+    }
   }
   const dael = w.filter(x => x.key === 'ដែល');
   if (dael.length >= 3) {
@@ -214,9 +253,25 @@ function clarity(ctx, s, add) {
   }
 }
 
+// Three or more sentences in a row that open with the same word read as monotonous.
+function sentenceOpenings(ctx, add) {
+  const ss = ctx.sentences.filter(s => s.terminator && s.words.length >= 3);
+  for (let i = 2; i < ss.length; i++) {
+    const k = ss[i].words[0].key;
+    if (ss[i - 1].words[0].key !== k || ss[i - 2].words[0].key !== k) continue;
+    if (i + 1 < ss.length && ss[i + 1].words[0].key === k) continue; // report a run once, at its end
+    const t = ss[i].words[0];
+    add({ start: t.start, end: t.end, category: 'repetition', severity: 'suggestion', confidence: 0.4, ruleId: 'repetition.sentence-openings',
+      title: 'ល្បះជាប់គ្នាចាប់ផ្ដើមដោយពាក្យដដែល',
+      explanation: `ល្បះជាប់គ្នាច្រើនចាប់ផ្ដើមដោយ «${t.text}»។ សំណេរស្ដាប់ទៅដដែលៗ។ ពិចារណាភ្ជាប់ល្បះខ្លះ ឬផ្លាស់ប្ដូរការចាប់ផ្ដើម។`,
+      suggestions: [], source: 'project-style' });
+  }
+}
+
 export function checkGrammar(ctx) {
   const out = [];
   const add = f => out.push(makeFinding(ctx.text, { layer: 'grammar', ...f }));
+  sentenceOpenings(ctx, add);
   for (const s of ctx.sentences) {
     confusables(ctx, s, add);
     repetition(ctx, s, add);

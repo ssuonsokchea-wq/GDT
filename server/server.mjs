@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { reportHtml } from '../engine/report.js';
 import { ENGINE_VERSION } from '../engine/analyzer.js';
 import { htmlToPdf, embeddedFontCss, pdfAvailable } from './pdf.mjs';
-import { aiEnabled, aiReview, AI_MODEL } from './ai-review.mjs';
+import { aiEnabled, aiReview, aiRephrase, AI_MODEL } from './ai-review.mjs';
 import { loadLexicon } from '../engine/node.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -209,6 +209,13 @@ export function createServer() {
         const body = await readBody(req);
         const mode = ['general', 'academic', 'government', 'administrative', 'legal'].includes(body.mode) ? body.mode : 'general';
         return json(res, 200, await aiReview(String(body.text || ''), mode, loadLexicon()));
+      }
+      if (url.pathname === '/api/rephrase' && req.method === 'POST') {
+        if (!aiEnabled()) return json(res, 503, { error: 'AI review is not enabled on this server' });
+        if (rateLimited(ip, 'ai', 10)) return json(res, 429, { error: 'Too many requests' });
+        const body = await readBody(req);
+        const mode = ['general', 'academic', 'government', 'administrative', 'legal'].includes(body.mode) ? body.mode : 'general';
+        return json(res, 200, await aiRephrase(String(body.text || ''), mode, loadLexicon()));
       }
       if (url.pathname.startsWith('/api/')) return json(res, 404, { error: 'Not found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');

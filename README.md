@@ -9,6 +9,7 @@ Its spelling authority is the **Chuon Nath Khmer Dictionary** (Buddhist Institut
 ## What you get
 
 - **Interactive editor** that underlines findings by category, with a card for each finding: Khmer explanation, suggested corrections, confidence (high, medium or low, with a percentage), location and source. Accept or reject findings one at a time, with undo.
+- **Clearer, shorter writing:** KhmerProof proposes cuts for wordy phrases («ធ្វើការពិភាក្សា» → «ពិភាក្សា», «មានការកើនឡើង» → «កើនឡើង», «ដើម្បីនឹង» → «ដើម្បី»), shows where to split a long sentence, notes runs of sentences that start with the same word, and offers the whole sentence rewritten when several cuts apply. With the optional AI review, **✦ សរសេរឡើងវិញ** offers up to three clearer, shorter or more formal versions of a selected passage; each is checked by the spelling engine (and in legal mode by the legal-meaning guard) before you see it.
 - **Five writing modes:** general, academic, government, administrative and legal. Legal mode never offers a one-click change that would alter negation, obligation, permission, «និង/ឬ», numbers, quoted defined terms or cross-references; such changes require confirmation by a person.
 - **Two dictionary profiles:** modern standard (Chuon Nath plus modern terms; ្ដ/្ត and ឲ/ឱ variants accepted) and strict Chuon Nath.
 - **Uploads:** TXT, DOCX and PDF. A corrected DOCX keeps the original file's fonts, styles and tables.
@@ -39,7 +40,7 @@ For PDF reports, run `npm run setup:pdf` once to download Chromium. For reliable
 | 4. Spelling | Curated misspellings; Khmer-aware edit distance to dictionary words; misspellings that split into valid-looking fragments | `engine/spelling.js` |
 | 5. Grammar and structure | និង/នឹង, ដែល/ដែរ, word order, tense conflicts, ការ/សេចក្ដី, classifiers, incomplete correlatives, questions, repetition, long or tangled sentences | `engine/rules/grammar.js`, `engine/rules/style.js` |
 | 6. Punctuation | ។ ៕ ៖ ៗ, quotation marks, spacing, Latin punctuation in Khmer text | `engine/rules/punctuation.js` |
-| 7. Context | Word-pair frequencies from the Chuon Nath definitions rank corrections and support grammar rules; optional AI review | `engine/lexicon.js`, `server/ai-review.mjs` |
+| 7. Context and clarity | Word-pair frequencies rank corrections; wordy-phrase cuts, sentence splits and whole-sentence rewrites; optional AI review and rephrasing | `engine/lexicon.js`, `engine/analyzer.js`, `server/ai-review.mjs` |
 | 8. Terminology | Mixed spellings of one word, defined terms in legal text, synonym pairs, mixed digits, your preferred terms | `engine/rules/consistency.js` |
 
 Every finding cites one of the sources in `engine/sources.js`. No rule claims a textbook page that has not been verified.
@@ -50,7 +51,7 @@ Every finding cites one of the sources in `engine/sources.js`. No rule claims a 
 
 | Test | Result |
 |---|---|
-| Gold corpus: 161 sentences (63 errors, 99 correct sentences including modern vocabulary, proper names, legal and government text) | 63 of 63 errors found; 0 false alarms; correct suggestion ranked first every time |
+| Gold corpus: 173 sentences (75 issues, 104 correct sentences including modern vocabulary, proper names, legal and government text) | 75 of 75 issues found; 0 false alarms; correct suggestion ranked first every time |
 | Human-written Khmer held out from the frequency model (603 phrases from Chuon Nath examples) | 10.7 flags per 1,000 words. Some are true errors in the source, such as 4 Unicode-order faults and «ចិញ្ជឹម»; most of the rest are rare words missing from both lists |
 | Errors injected into that held-out text | Confusable letters: 96% detected, 89% corrected. Missing subscripts: 94% and 82%. Disordered Unicode: 100% and 98%. Real-word swaps (និង/នឹង, ដែល/ដែរ): 17% detected |
 
@@ -59,9 +60,9 @@ Every finding cites one of the sources in `engine/sources.js`. No rule claims a 
 ## Tests
 
 ```bash
-npm test             # 24 unit and regression tests, including the prototype failure
+npm test             # 27 unit and regression tests, including the prototype failure
 npm run evaluate     # accuracy and false-alarm measurement
-npm run test:e2e     # 12 browser tests in Chromium (run `npm run setup:pdf` first)
+npm run test:e2e     # 14 browser tests in Chromium, including the AI flow against a mock API (run `npm run setup:pdf` first)
 ```
 
 The prototype's failure, and its fix, are explained in [docs/ROOT_CAUSE.md](docs/ROOT_CAUSE.md).
