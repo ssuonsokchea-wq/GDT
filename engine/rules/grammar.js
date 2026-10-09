@@ -141,8 +141,11 @@ function correlatives(ctx, s, add) {
     for (const hit of findPhrase(s, opener)) {
       const rest = s.words.slice(hit.j + 1).map(x => x.key).join('');
       if (!closers.some(c => rest.includes(c))) {
+        // «គាត់មិនត្រឹមតែរៀនពូកែ។» → «គាត់រៀនពូកែ។» is complete; adding the missing half needs the writer.
+        const removable = opener === 'មិនត្រឹមតែ';
         add({ start: hit.start, end: hit.end, category: 'missing', severity: 'suggestion', confidence: 0.45, ruleId: 'missing.correlative',
-          title: 'ខ្វះពាក្យគូ', explanation, suggestions: [], source: 'project-grammar' });
+          title: 'ខ្វះពាក្យគូ', explanation: explanation + (removable ? ' សំណើ៖ លុប «មិនត្រឹមតែ» ចេញ ដើម្បីឱ្យល្បះពេញលេញ ឬបន្ថែមផ្នែកទីពីរដោយខ្លួនឯង។' : ''),
+          suggestions: removable ? [''] : [], source: 'project-grammar' });
       }
     }
   };
@@ -159,10 +162,13 @@ function questions(ctx, s, add) {
   // Checked on the joined text, because the segmenter may join «មិនទៅ» into one word.
   const xNotX = s.words.some((x, i) => rest.includes(x.key + 'មិន' + x.key) && i > 0);
   if (!xNotX && !QUESTION_MARKERS.some(q => rest.includes(q))) {
-    add({ start: s.words[0].start, end: s.words[0].end, category: 'missing', severity: 'suggestion', confidence: 0.45, ruleId: 'missing.question-word',
+    const w = s.words, last = w[w.length - 1];
+    const end = s.terminator ? s.tokens[s.tokens.length - 1].end : last.end;
+    const body = ctx.text.slice(w[0].start, last.end), withoutTae = ctx.text.slice(w[1] ? w[1].start : last.end, last.end);
+    add({ start: w[0].start, end, category: 'missing', severity: 'suggestion', confidence: 0.45, ruleId: 'missing.question-word',
       title: 'ខ្វះពាក្យសួរ',
-      explanation: 'ល្បះចាប់ផ្ដើមដោយ «តើ» ប៉ុន្តែគ្មានពាក្យសួរ (ឧ. «អ្វី» «ណា» «ទេ» «ឬទេ» «ប៉ុន្មាន»)។ ពិនិត្យថាតើខ្វះពាក្យសួរ ឬ «តើ» មិនចាំបាច់។',
-      suggestions: [], source: 'project-grammar' });
+      explanation: 'ល្បះចាប់ផ្ដើមដោយ «តើ» ប៉ុន្តែគ្មានពាក្យសួរ (ឧ. «អ្វី» «ណា» «ទេ» «ឬទេ» «ប៉ុន្មាន»)។ បើជាសំណួរ សូមបន្ថែម «ទេ» និង «?»។ បើមិនមែនសំណួរ សូមលុប «តើ» ចេញ។',
+      suggestions: w[1] ? [body + 'ទេ?', withoutTae + '។'] : [], source: 'project-grammar' });
   }
 }
 
@@ -228,15 +234,43 @@ function splitPoint(ctx, s) {
   return { start, end, replacement, word: t, drop };
 }
 
+const NO_SPLIT_AFTER = new Set(['ដែល', 'ថា', 'និង', 'ឬ', 'នៃ', 'របស់', 'នូវ', 'ដោយ', 'ពី', 'នៅ', 'ក្នុង', 'ដល់', 'ចំពោះ', 'សម្រាប់', 'ជា', 'គឺ']);
+
+/** A space before «subject + verb» near the middle of a long sentence, outside brackets. */
+function subjectSplit(ctx, s) {
+  const w = s.words;
+  let best = null;
+  for (let i = 8; i < w.length - 8; i++) {
+    const t = w[i], prev = w[i - 1], next = w[i + 1];
+    if (!/^[ \t\u200B]+$/u.test(ctx.text.slice(prev.end, t.start))) continue;
+    if (NO_SPLIT_AFTER.has(prev.key) || has(posOf(ctx, prev), POS.PREP) || has(posOf(ctx, prev), POS.CONJ)) continue;
+    const before = ctx.text.slice(s.start, t.start);
+    if ((before.match(/[(«]/g) || []).length > (before.match(/[)»]/g) || []).length) continue; // inside brackets or quotes
+    const subject = isPron(ctx, t) || (has(posOf(ctx, t), POS.N) && !isVerbOnly(ctx, t));
+    const verb = next && (isVerbOnly(ctx, next) || ['បាន', 'នឹង', 'កំពុង', 'មិន', 'ត្រូវ', 'អាច', 'ក៏'].includes(next.key));
+    if (!subject || !verb) continue;
+    const dist = Math.abs(i - w.length / 2);
+    if (!best || dist < best.dist) best = { i, dist };
+  }
+  if (!best) return null;
+  const prev = w[best.i - 1], t = w[best.i];
+  return { start: prev.start, end: t.start, replacement: `${prev.text}។ `, word: t };
+}
+
 function clarity(ctx, s, add) {
   const w = s.words;
   if (w.length > LONG_SENTENCE) {
-    const split = splitPoint(ctx, s);
+    let split = splitPoint(ctx, s);
     if (split) {
       add({ start: split.start, end: split.end, category: 'clarity', severity: 'suggestion', confidence: 0.45, ruleId: 'clarity.split-sentence',
         title: 'ល្បះវែងពេក៖ អាចបំបែកនៅទីនេះ',
         explanation: `ល្បះនេះមានប្រហែល ${w.length} ពាក្យ។ ល្បះវែងពិបាកអាន។ «${split.word.text}» ចាប់ផ្ដើមឃ្លាថ្មីដែលមានប្រធានផ្ទាល់ខ្លួន ដូច្នេះអាចបញ្ចប់ល្បះទីមួយនៅទីនេះ ហើយចាប់ផ្ដើមល្បះថ្មី ដោយន័យនៅដដែល។` +
           (split.drop ? ` ពាក្យ «${split.word.text}» អាចលុបចេញ ព្រោះខណ្ឌសញ្ញា «។» ជំនួសមុខងាររបស់វា។` : ''),
+        suggestions: [split.replacement], source: 'project-style', autoFixSafe: false });
+    } else if ((split = subjectSplit(ctx, s))) {
+      add({ start: split.start, end: split.end, category: 'clarity', severity: 'suggestion', confidence: 0.4, ruleId: 'clarity.split-sentence',
+        title: 'ល្បះវែងពេក៖ អាចបំបែកនៅទីនេះ',
+        explanation: `ល្បះនេះមានប្រហែល ${w.length} ពាក្យ។ ឃ្លាថ្មីចាប់ផ្ដើមដោយប្រធាន «${split.word.text}» និងកិរិយាសព្ទរបស់វា ដូច្នេះអាចបញ្ចប់ល្បះទីមួយនៅមុខវា។ សូមអានល្បះទាំងពីរម្ដងទៀត ថាន័យនៅដដែល។`,
         suggestions: [split.replacement], source: 'project-style', autoFixSafe: false });
     } else {
       add({ start: w[0].start, end: w[Math.min(w.length - 1, 5)].end, category: 'clarity', severity: 'suggestion', confidence: 0.5, ruleId: 'clarity.long-sentence',
@@ -271,11 +305,17 @@ function sentenceOpenings(ctx, add) {
     const k = ss[i].words[0].key;
     if (ss[i - 1].words[0].key !== k || ss[i - 2].words[0].key !== k) continue;
     if (i + 1 < ss.length && ss[i + 1].words[0].key === k) continue; // report a run once, at its end
-    const t = ss[i].words[0];
-    add({ start: t.start, end: t.end, category: 'repetition', severity: 'suggestion', confidence: 0.4, ruleId: 'repetition.sentence-openings',
-      title: 'ល្បះជាប់គ្នាចាប់ផ្ដើមដោយពាក្យដដែល',
-      explanation: `ល្បះជាប់គ្នាច្រើនចាប់ផ្ដើមដោយ «${t.text}»។ សំណេរស្ដាប់ទៅដដែលៗ។ ពិចារណាភ្ជាប់ល្បះខ្លះ ឬផ្លាស់ប្ដូរការចាប់ផ្ដើម។`,
-      suggestions: [], source: 'project-style' });
+    const t = ss[i].words[0], prevS = ss[i - 1], term = prevS.tokens[prevS.tokens.length - 1];
+    // Join the last two sentences of the run: «ខ្ញុំទិញត្រី។ ខ្ញុំត្រឡប់…» → «ខ្ញុំទិញត្រី ហើយត្រឡប់…».
+    // Only when the shared opener is the subject and a verb follows it, and the result stays short.
+    const subject = isPron(ctx, t) || isNounOnly(ctx, t);
+    const verbNext = ss[i].words[1] && (isVerbish(ctx, ss[i].words[1]) || MODAL_OR_ASPECT.has(ss[i].words[1].key) || ['បាន', 'នឹង', 'កំពុង', 'ក៏'].includes(ss[i].words[1].key));
+    const canJoin = subject && verbNext && prevS.terminator === '។' && prevS.words.length + ss[i].words.length <= 30;
+    add({ start: canJoin ? term.start : t.start, end: t.end, category: 'repetition', severity: 'suggestion', confidence: canJoin ? 0.5 : 0.4, ruleId: 'repetition.sentence-openings',
+      title: canJoin ? 'អាចភ្ជាប់ល្បះពីរជាមួយ «ហើយ»' : 'ល្បះជាប់គ្នាចាប់ផ្ដើមដោយពាក្យដដែល',
+      explanation: `ល្បះជាប់គ្នាច្រើនចាប់ផ្ដើមដោយ «${t.text}» ធ្វើឱ្យសំណេរស្ដាប់ទៅដដែលៗ។` +
+        (canJoin ? ` ល្បះពីរចុងក្រោយមានប្រធានដូចគ្នា ដូច្នេះអាចភ្ជាប់ជាល្បះតែមួយ ដោយប្រើ «ហើយ» ជំនួស «។ ${t.text}» ហើយន័យនៅដដែល។` : ' ពិចារណាភ្ជាប់ល្បះខ្លះ ឬផ្លាស់ប្ដូរការចាប់ផ្ដើម។'),
+      suggestions: canJoin ? [' ហើយ'] : [], source: 'project-style' });
   }
 }
 

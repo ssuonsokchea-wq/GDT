@@ -168,12 +168,12 @@ function card(f) {
   const change = f.scope === 'sentence' && f.suggestions.length
     ? el('div', { class: 'rewrite', lang: 'km' }, el('span', { class: 'tag' }, 'មុន'), el('span', { class: 'before' }, f.original),
       el('span', { class: 'tag' }, 'ក្រោយ'), el('span', { class: 'after' }, f.suggestions[0]))
-    : el('div', { class: 'change', lang: 'km' }, el('del', {}, show(f.original)), f.suggestions.length ? ` → ${show(f.suggestions[0])}` : null);
+    : el('div', { class: 'change', lang: 'km' }, el('del', {}, show(f.original)), f.suggestions.length ? ` → ${f.suggestions[0] === '' ? '(លុបចេញ)' : show(f.suggestions[0])}` : null);
   const actions = el('div', { class: 'actions' });
   f.suggestions.slice(0, 4).forEach((s, i) => actions.append(el('button', {
     type: 'button', title: 'ទទួលយកការកែនេះ', 'aria-label': `ទទួលយក «${s}»`,
     onclick: ev => { ev.stopPropagation(); accept(f, s); },
-  }, f.scope === 'sentence' ? '✓ ប្រើល្បះថ្មី' : i === 0 ? `✓ ${show(s)}` : show(s))));
+  }, f.scope === 'sentence' ? '✓ ប្រើល្បះថ្មី' : s === '' ? '✓ លុបចេញ' : i === 0 ? `✓ ${show(s)}` : show(s))));
   if (state.server.ai && ['clarity', 'unnecessary', 'wording', 'structure', 'repetition'].includes(f.category)) {
     actions.append(el('button', { type: 'button', class: 'ghost', onclick: ev => { ev.stopPropagation(); rephrase(...sentenceRange(f.start)); } }, '✦ សរសេរឡើងវិញ'));
   }

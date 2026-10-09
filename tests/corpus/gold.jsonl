@@ -183,3 +183,6 @@
 {"id": "mn-c04", "group": "meaning-correct", "mode": "general", "text": "តម្លៃប្រេងឡើងចុះជារៀងរាល់សប្ដាហ៍។", "expect": [], "note": "ឡើងចុះ is one dictionary word (to fluctuate)."}
 {"id": "mn-c05", "group": "meaning-correct", "mode": "general", "text": "គាត់ធ្វើការពីព្រឹកដល់ល្ងាច។", "expect": []}
 {"id": "mn-c06", "group": "meaning-correct", "mode": "general", "text": "សប្ដាហ៍មុន ខ្ញុំបានទិញផ្ទះថ្មី ហើយសប្ដាហ៍ក្រោយ ខ្ញុំនឹងរើចូលនៅ។", "expect": [], "note": "Past and future in separate clauses are not a contradiction."}
+{"id":"mn-002","group":"meaning","mode":"general","text":"គាត់ជាមិត្តដែលខ្ញុំមិនធ្លាប់ជួបកាលពីថ្ងៃស្អែក។","expect":[{"original":"កាលពីថ្ងៃស្អែក","category":"clarity"}]}
+{"id":"mn-c07","group":"meaning-correct","mode":"general","text":"កាលពីម្សិលមិញ ខ្ញុំបានជួបគាត់នៅផ្សារ។","expect":[]}
+{"id":"cc-008","group":"concision","mode":"general","text":"តើអ្នកនឹងទៅ។","expect":[{"original":"តើអ្នកនឹងទៅ។","category":"missing","suggestion":"តើអ្នកនឹងទៅទេ?"},{"original":"។","category":"punctuation","suggestion":"?"}]}

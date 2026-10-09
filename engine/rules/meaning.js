@@ -12,7 +12,7 @@
 import { makeFinding } from '../finding.js';
 import { wordKey } from '../normalize.js';
 
-const PAST = new Set(['ម្សិលមិញ', 'ម្សិលម្ងៃ', 'ម្សិល']);
+const PAST = new Set(['ម្សិលមិញ', 'ម្សិលម្ងៃ', 'ម្សិល', 'កាលពី', 'កន្លងទៅ', 'កន្លងមក']);
 const FUTURE = new Set(['ស្អែក', 'ថ្ងៃស្អែក', 'ខានស្អែក']);
 const UNITS = ['សប្ដាហ៍', 'សប្តាហ៍', 'ខែ', 'ឆ្នាំ', 'ថ្ងៃ'];
 const TIMES_OF_DAY = ['ព្រឹក', 'ថ្ងៃត្រង់', 'រសៀល', 'ល្ងាច', 'យប់', 'អាធ្រាត្រ'];
