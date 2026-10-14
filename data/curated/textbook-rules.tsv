@@ -1,0 +1,5 @@
+# Grammar rules transcribed from the user's Khmer grammar textbook and VERIFIED against the page image.
+# Produced with scripts/ocr_textbook.py (see docs/TEXTBOOK.md). The build loads a row only when
+# verified_by and pdf_page are filled in. Columns are tab-separated.
+# This file is empty because the textbook was not supplied to this build.
+rule_id	pdf_page	printed_page	section	rule_text_km	example_correct	example_incorrect	pattern_wrong	pattern_right	category	machine_checkable	verified_by	verified_on	notes

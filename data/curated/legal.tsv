@@ -1,0 +1,119 @@
+# word	English gloss	note	POS (N or V)
+# Project-curated Cambodian legal terminology. Sources consulted for term forms: the
+# Constitution of the Kingdom of Cambodia, the Civil Code (2007) and the Code of Civil
+# Procedure (2006) as commonly published. Entries need review by a Khmer legal linguist.
+ច្បាប់	law		N
+រដ្ឋធម្មនុញ្ញ	constitution		N
+ក្រម	code		N
+ក្រមរដ្ឋប្បវេណី	Civil Code		N
+ក្រមនីតិវិធីរដ្ឋប្បវេណី	Code of Civil Procedure		N
+ក្រមព្រហ្មទណ្ឌ	Criminal Code		N
+ក្រមនីតិវិធីព្រហ្មទណ្ឌ	Code of Criminal Procedure		N
+ព្រះរាជក្រម	Royal Kram		N
+ព្រះរាជក្រឹត្យ	Royal Decree		N
+អនុក្រឹត្យ	Sub-decree		N
+ប្រកាស	Prakas (ministerial regulation)		N
+ប្រកាសអន្តរក្រសួង	inter-ministerial Prakas		N
+សារាចរ	circular		N
+សេចក្ដីសម្រេច	decision		N
+បទបញ្ជា	order, regulation		N
+បទប្បញ្ញត្តិ	provision, regulation		N
+ជំពូក	chapter		N
+មាត្រា	article		N
+កថាខណ្ឌ	paragraph		N
+ចំណុច	point		N
+វាក្យខណ្ឌ	clause		N
+ឧបសម្ព័ន្ធ	annex		N
+កិច្ចសន្យា	contract		N
+កិច្ចព្រមព្រៀង	agreement		N
+អនុស្សរណៈ	memorandum		N
+អនុស្សរណៈនៃការយោគយល់	memorandum of understanding		N
+ភាគី	party		N
+ភាគីទីមួយ	first party		N
+ភាគីទីពីរ	second party		N
+តតិយជន	third party		N
+អ្នកលក់	seller		N
+អ្នកទិញ	buyer		N
+អ្នកជួល	lessee		N
+អ្នកឱ្យជួល	lessor		N
+ម្ចាស់បំណុល	creditor		N
+កូនបំណុល	debtor		N
+បំណុល	debt		N
+កាតព្វកិច្ច	obligation		N
+សិទ្ធិ	right		N
+កម្មសិទ្ធិ	ownership		N
+កម្មសិទ្ធិករ	owner		N
+ទ្រព្យសម្បត្តិ	property		N
+អចលនវត្ថុ	immovable property		N
+ចលនវត្ថុ	movable property		N
+ការធានា	security, guarantee		N
+អ្នកធានា	guarantor		N
+ហ៊ីប៉ូតែក	hypothec		N
+បញ្ចាំ	pledge		V
+សំណង	compensation		N
+ការខូចខាត	damage		N
+ការរំលោភ	violation, breach		N
+ការបំពាន	breach		N
+ការលុបចោល	cancellation, rescission		N
+ការបញ្ចប់	termination		N
+ការផ្ទេរ	transfer		N
+អាណត្តិ	mandate, term		N
+លិខិតប្រគល់សិទ្ធិ	power of attorney		N
+តំណាង	representative		N
+អ្នកតំណាង	representative		N
+ហត្ថលេខី	signatory		N
+សាក្សី	witness		N
+ភស្តុតាង	evidence		N
+តុលាការ	court		N
+សាលាដំបូង	court of first instance		N
+សាលាឧទ្ធរណ៍	Court of Appeal		N
+តុលាការកំពូល	Supreme Court		N
+ចៅក្រម	judge		N
+ព្រះរាជអាជ្ញា	prosecutor		N
+មេធាវី	lawyer		N
+មេធាវីការពារក្ដី	defence lawyer		N
+ដើមចោទ	plaintiff		N
+ចុងចោទ	defendant, accused		N
+ជនជាប់ចោទ	accused		N
+ជនរងគ្រោះ	victim		N
+បណ្ដឹង	complaint, claim		N
+បណ្ដឹងឧទ្ធរណ៍	appeal		N
+បណ្ដឹងសាទុក្ខ	cassation appeal		N
+សាលក្រម	judgment (first instance)		N
+សាលដីកា	judgment (appeal/supreme)		N
+ដីកា	order, warrant		N
+ការកាត់ក្ដី	adjudication		N
+អាជ្ញាកណ្ដាល	arbitration		N
+ក្រុមប្រឹក្សាអាជ្ញាកណ្ដាល	Arbitration Council		N
+ការផ្សះផ្សា	conciliation		N
+វិវាទ	dispute		N
+វិវាទការងារ	labour dispute		N
+ច្បាប់ស្ដីពីការងារ	Labour Law		N
+កម្មករ	worker		N
+និយោជក	employer		N
+និយោជិត	employee		N
+កិច្ចសន្យាការងារ	employment contract		N
+ប្រាក់ឈ្នួល	wage		N
+យុត្តាធិការ	jurisdiction		N
+អាជ្ញាប័ណ្ណ	licence		N
+លិខិតអនុញ្ញាត	permit		N
+ពាណិជ្ជសញ្ញា	trademark		N
+ប៉ាតង់	patent		N
+កម្មសិទ្ធិបញ្ញា	intellectual property		N
+រក្សាសិទ្ធិ	copyright		N
+ការសម្ងាត់	confidentiality		N
+ព័ត៌មានសម្ងាត់	confidential information		N
+បទល្មើស	offence		N
+ទោស	penalty		N
+ពិន័យ	fine		V
+ទណ្ឌកម្ម	sanction		N
+អាជ្ញាធរ	authority		N
+អាជ្ញាធរមានសមត្ថកិច្ច	competent authority		N
+សមត្ថកិច្ច	competence		N
+ការអនុវត្ត	implementation, enforcement		N
+ចូលជាធរមាន	enter into force		V
+ជាធរមាន	in force		N
+និរាករណ៍	repeal		N
+បទប្បញ្ញត្តិអន្តរកាល	transitional provision		N
+អវសានបញ្ញត្តិ	final provision		N
+ហត្ថលេខាឌីជីថល	digital signature		N

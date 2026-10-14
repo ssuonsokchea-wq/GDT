@@ -1,0 +1,7 @@
+# word	English	French	domain	NCKL reference (session / decision / date)
+# Terms approved by the National Council of Khmer Language (ក្រុមប្រឹក្សាជាតិភាសាខ្មែរ,
+# Royal Academy of Cambodia): https://nckl.rac.gov.kh/
+# This file is intentionally EMPTY. The build environment could not reach the NCKL site,
+# and no term may be listed here without a reference that a reviewer can check.
+# Add one approved term per line, then run `npm run build:data`. Imported terms outrank
+# every other modern source and are cited as NCKL in reports.
