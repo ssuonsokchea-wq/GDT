@@ -257,6 +257,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`KhmerProof ${ENGINE_VERSION} running at ${url}`);
     console.log(`AI review: ${aiEnabled() ? 'enabled (' + AI_MODEL + ')' : 'off'}`);
     // The Windows launcher asks the server to open the browser once it is really running.
-    if (process.env.KHMERPROOF_OPEN === '1' && process.platform === 'win32') execFile('cmd', ['/c', 'start', '', url]);
+    if (process.env.KHMERPROOF_OPEN === '1') {
+      if (process.platform === 'win32') execFile('cmd', ['/c', 'start', '', url]);
+      else if (process.platform === 'darwin') execFile('open', [url]);
+    }
   });
 }
