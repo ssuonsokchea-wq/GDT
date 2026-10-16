@@ -19,6 +19,7 @@ import { reportHtml } from '../engine/report.js';
 import { ENGINE_VERSION } from '../engine/analyzer.js';
 import { htmlToPdf, embeddedFontCss, pdfAvailable } from './pdf.mjs';
 import { aiEnabled, aiReview, aiRephrase, AI_MODEL } from './ai-review.mjs';
+import { currentKey, keyHint, saveKey, deleteKey, isLoopback } from './keystore.mjs';
 import { loadLexicon } from '../engine/node.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -198,6 +199,16 @@ export function createServer() {
         if (rateLimited(ip, 'extract', 20)) return json(res, 429, { error: 'Too many requests' });
         if (!await pdftotextAvailable()) return json(res, 501, { error: 'pdftotext is not installed on this server' });
         return json(res, 200, await extractPdf(await readRaw(req, 25 * 1024 * 1024)));
+      }
+      if (url.pathname === '/api/settings' && req.method === 'GET') {
+        return json(res, 200, { aiKeySet: !!currentKey(), keyHint: keyHint(), keyEditable: isLoopback(req), aiEnabled: aiEnabled() });
+      }
+      if (url.pathname === '/api/settings/ai-key' && (req.method === 'POST' || req.method === 'DELETE')) {
+        if (!isLoopback(req)) return json(res, 403, { error: 'Only the computer running KhmerProof can change the key' });
+        if (req.method === 'DELETE') { deleteKey(); return json(res, 200, { aiKeySet: !!currentKey(), keyHint: keyHint(), aiEnabled: aiEnabled() }); }
+        const body = await readBody(req);
+        saveKey(String(body.key || '').trim());
+        return json(res, 200, { aiKeySet: true, keyHint: keyHint(), aiEnabled: aiEnabled() });
       }
       if (url.pathname === '/api/report/pdf' && req.method === 'POST') {
         if (rateLimited(ip, 'pdf', 20)) return json(res, 429, { error: 'Too many requests' });

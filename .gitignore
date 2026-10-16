@@ -12,3 +12,6 @@ private/
 textbook/
 *.scan.pdf
 dist/
+
+# API keys saved by the app on this computer
+local/

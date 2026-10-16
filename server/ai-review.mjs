@@ -9,6 +9,7 @@
 // In legal mode every AI finding is marked for human review.
 
 import Anthropic from '@anthropic-ai/sdk';
+import { currentKey } from './keystore.mjs';
 import { z } from 'zod';
 import { analyze, meaningSignature } from '../engine/analyzer.js';
 import { makeFinding, CATEGORIES } from '../engine/finding.js';
@@ -18,7 +19,7 @@ export const AI_MODEL = process.env.KHMERPROOF_AI_MODEL || 'claude-opus-5-5';
 export const AI_MAX_CHARS = 6000;
 
 export function aiEnabled() {
-  return process.env.KHMERPROOF_AI === 'on' && !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+  return process.env.KHMERPROOF_AI !== 'off' && !!currentKey();
 }
 
 const ALLOWED = ['grammar', 'structure', 'wording', 'missing', 'unnecessary', 'clarity', 'spelling', 'punctuation', 'repetition', 'terminology'];
@@ -80,7 +81,7 @@ Report only problems you are confident a careful Khmer editor would agree with. 
 export async function aiReview(text, mode, lexicon) {
   if (!aiEnabled()) throw Object.assign(new Error('AI review is not enabled on this server'), { status: 503 });
   if (text.length > AI_MAX_CHARS) throw Object.assign(new Error(`AI review accepts at most ${AI_MAX_CHARS} characters`), { status: 413 });
-  const client = new Anthropic({ maxRetries: 1, timeout: 120000 });
+  const client = new Anthropic({ apiKey: currentKey(), maxRetries: 1, timeout: 120000 });
   const response = await client.beta.messages.create({
     model: AI_MODEL,
     max_tokens: 16000,
@@ -164,7 +165,7 @@ export async function aiRephrase(passage, mode, lexicon) {
   passage = String(passage || '').trim();
   if (!passage) throw Object.assign(new Error('Nothing to rephrase'), { status: 400 });
   if (passage.length > REPHRASE_MAX_CHARS) throw Object.assign(new Error(`Select at most ${REPHRASE_MAX_CHARS} characters`), { status: 413 });
-  const client = new Anthropic({ maxRetries: 1, timeout: 120000 });
+  const client = new Anthropic({ apiKey: currentKey(), maxRetries: 1, timeout: 120000 });
   const response = await client.beta.messages.create({
     model: AI_MODEL,
     max_tokens: 8000,

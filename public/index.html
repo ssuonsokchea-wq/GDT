@@ -123,6 +123,16 @@
       <input type="file" id="ncklFile" accept=".csv,.tsv,.txt">
       <p id="ncklStatus" class="hint"></p>
     </fieldset>
+    <fieldset id="aiKeyBox" hidden>
+      <legend>កូដ AI (Claude) សម្រាប់ «✦ សរសេរឡើងវិញ»</legend>
+      <p class="hint">បិទភ្ជាប់កូដ API របស់អ្នកម្ដង។ កូដនេះត្រូវបានរក្សាទុកក្នុងកុំព្យូទ័រនេះតែប៉ុណ្ណោះ ហើយមិនត្រូវបានផ្ញើទៅកម្មវិធីរុករកទេ។</p>
+      <p id="aiKeyStatus" class="hint"></p>
+      <input type="password" id="aiKeyInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" aria-label="កូដ API របស់ Anthropic">
+      <div class="dialog-actions">
+        <button type="button" id="removeAiKey" class="ghost">លុបកូដ</button>
+        <button type="button" id="saveAiKey">រក្សាទុកកូដ</button>
+      </div>
+    </fieldset>
     <div class="dialog-actions">
       <button value="cancel" class="ghost">បោះបង់</button>
       <button value="save" id="saveSettings">រក្សាទុក</button>

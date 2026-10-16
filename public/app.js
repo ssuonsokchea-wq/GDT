@@ -500,7 +500,50 @@ function addUserWord(word) {
   worker.postMessage({ type: 'words', lexiconUrl: LEXICON_URL, userWords: state.userWords, ncklWords: state.ncklWords });
   toast(`បានបន្ថែម «${word}» ទៅសទ្ទានុក្រមរបស់អ្នក`);
 }
+async function refreshAiKeyBox() {
+  let s = null;
+  try { const r = await fetch('./api/settings'); if (r.ok) s = await r.json(); } catch { /* static site */ }
+  $('aiKeyBox').hidden = !(s && s.keyEditable);
+  if (!s) return;
+  $('aiKeyStatus').textContent = s.aiKeySet ? `កូដត្រូវបានរក្សាទុក (…${s.keyHint}) ✓` : 'មិនទាន់មានកូដ';
+  $('removeAiKey').disabled = !s.aiKeySet;
+}
+async function refreshAiFeatures() {
+  try {
+    const s = await (await fetch('./api/status')).json();
+    state.server = { pdf: !!s.pdf, ai: !!s.ai, pdfText: !!s.pdfText };
+    $('aiBtn').hidden = !s.ai;
+    $('rephraseBtn').hidden = !s.ai;
+  } catch { /* static site */ }
+}
+async function saveAiKey() {
+  const key = $('aiKeyInput').value.trim();
+  if (!key) { toast('សូមបិទភ្ជាប់កូដ API ជាមុនសិន។'); return; }
+  try {
+    const res = await fetch('./api/settings/ai-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.status);
+    $('aiKeyInput').value = '';
+    await refreshAiKeyBox();
+    await refreshAiFeatures();
+    toast('បានរក្សាទុកកូដ។ ឥឡូវអាចប្រើ «✦ សរសេរឡើងវិញ» បាន។');
+  } catch (e) {
+    toast('មិនអាចរក្សាទុកកូដបានទេ៖ ' + e.message);
+  }
+}
+async function removeAiKey() {
+  try {
+    const res = await fetch('./api/settings/ai-key', { method: 'DELETE' });
+    if (!res.ok) throw new Error((await res.json()).error || res.status);
+    await refreshAiKeyBox();
+    await refreshAiFeatures();
+    toast('បានលុបកូដ។');
+  } catch (e) {
+    toast('មិនអាចលុបកូដបានទេ៖ ' + e.message);
+  }
+}
 function openSettings() {
+  refreshAiKeyBox();
   $('userWords').value = state.userWords.join('\n');
   $('termRules').value = store.get('termRules', '');
   $('ncklStatus').textContent = state.ncklWords.length ? `បាននាំចូល ${toKhmerDigits(state.ncklWords.length)} ពាក្យ` : '';
@@ -553,6 +596,8 @@ function init() {
   state.onlyFixable = $('onlyFixable').checked = store.get('onlyFixable', false);
   $('settingsBtn').onclick = openSettings;
   $('ncklFile').onchange = e => { if (e.target.files[0]) importNckl(e.target.files[0]); };
+  $('saveAiKey').onclick = saveAiKey;
+  $('removeAiKey').onclick = removeAiKey;
   $('consentCheck').onchange = e => { $('consentOk').disabled = !e.target.checked; };
   $('settingsDialog').addEventListener('close', () => {
     if ($('settingsDialog').returnValue !== 'save') return;

@@ -52,15 +52,13 @@ Scanned PDFs contain images, not text. Run OCR on them first; see [TEXTBOOK.md](
 
 The web app includes the Noto Sans Khmer font. Word reports ask for **Khmer OS Siemreap**. If that font is not installed, Word substitutes another Khmer font, usually Khmer UI or Leelawadee UI. The free Khmer OS fonts are widely available in Cambodia; installing them gives reports the usual government look.
 
-## 6. Optional: AI contextual review
+## 6. Optional: AI rephrasing (you pay Anthropic per use)
 
-This sends text to Anthropic, so leave it off for confidential documents unless your organisation allows it. To turn it on for this session only:
+1. Start KhmerProof, click **⚙ សទ្ទានុក្រម** (settings), and scroll to **កូដ AI**.
+2. Paste your API key (it starts with `sk-ant-`) and click **រក្សាទុកកូដ**.
+3. **✦ សរសេរឡើងវិញ** appears. Select a sentence and click it.
 
-```powershell
-$env:KHMERPROOF_AI = "on"
-$env:ANTHROPIC_API_KEY = "sk-ant-..."     # never put the key in a file you commit
-npm start
-```
+The key is saved only in the `local` folder inside KhmerProof, on this computer. Git ignores that folder, and the key is never shown in full or sent to the browser. To remove it, open settings and click **លុបកូដ**.
 
 ## 7. Optional: run the tests
 

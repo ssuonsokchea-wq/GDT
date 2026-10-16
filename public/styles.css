@@ -159,3 +159,6 @@ dialog::backdrop { background: rgb(0 0 0 / 40%); }
 .advice { font-size: 13px !important; color: var(--muted); border-left: 3px solid var(--line); padding-left: 8px; }
 
 .version { font-size: 12px; font-weight: 400; color: var(--muted); }
+
+#aiKeyInput { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg); font-family: monospace; }
+#aiKeyBox[hidden] { display: none; }

@@ -2,17 +2,52 @@
 // hand-written "model output" to the validator, without calling any API.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { validate, aiEnabled } from '../../server/ai-review.mjs';
+
+const FAKE_KEY = 'sk-ant-api03-' + 'x'.repeat(30);
 import { loadLexicon } from '../../engine/node.js';
 
 const lexicon = loadLexicon();
 const text = 'គាត់បានទៅផ្សារដើម្បីទិញបន្លែ ហើយគាត់ក៏បានទិញត្រីដែរ។';
 
-test('AI review is off unless explicitly enabled', () => {
-  const saved = process.env.KHMERPROOF_AI;
-  delete process.env.KHMERPROOF_AI;
+test('AI review needs a key, and KHMERPROOF_AI=off turns it off', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kp-keys-'));
+  process.env.KHMERPROOF_LOCAL_DIR = dir;
+  const saved = { k: process.env.ANTHROPIC_API_KEY, a: process.env.KHMERPROOF_AI };
+  delete process.env.ANTHROPIC_API_KEY; delete process.env.KHMERPROOF_AI;
+  const ks = await import('../../server/keystore.mjs');
+  assert.equal(ks.currentKey(), null);
   assert.equal(aiEnabled(), false);
-  if (saved !== undefined) process.env.KHMERPROOF_AI = saved;
+  ks.saveKey(FAKE_KEY);
+  assert.equal(aiEnabled(), true);
+  assert.equal(ks.keyHint(), FAKE_KEY.slice(-4));
+  process.env.KHMERPROOF_AI = 'off';
+  assert.equal(aiEnabled(), false);
+  process.env.KHMERPROOF_AI = saved.a ?? '';
+  if (saved.a === undefined) delete process.env.KHMERPROOF_AI;
+  ks.deleteKey();
+  assert.equal(aiEnabled(), false);
+  if (saved.k !== undefined) process.env.ANTHROPIC_API_KEY = saved.k;
+  delete process.env.KHMERPROOF_LOCAL_DIR;
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('the key is validated, stored with private permissions, and never returned', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kp-keys-'));
+  process.env.KHMERPROOF_LOCAL_DIR = dir;
+  const ks = await import('../../server/keystore.mjs');
+  assert.throws(() => ks.saveKey('not-a-key'), /does not look like/);
+  assert.throws(() => ks.saveKey('sk-ant-short'), /does not look like/);
+  ks.saveKey(FAKE_KEY);
+  const file = path.join(dir, 'api-key.txt');
+  assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+  ks.deleteKey();
+  assert.equal(fs.existsSync(file), false);
+  delete process.env.KHMERPROOF_LOCAL_DIR;
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test('findings whose text is not in the document are dropped', () => {
