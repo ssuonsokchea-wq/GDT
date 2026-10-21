@@ -78,11 +78,20 @@ The prototype's failure, and its fix, are explained in [docs/ROOT_CAUSE.md](docs
 
 The dictionary data is licensed under LGPL-2.1 (`data/LICENSES/LGPL-2.1.txt`); the Noto Sans Khmer font under the SIL Open Font License. [docs/SOURCES.md](docs/SOURCES.md) lists every source, its licence and its status, including the NCKL terminology (not yet imported) and the grammar textbook (not supplied). **No licence has yet been chosen for the KhmerProof code itself.** Choose one before you publish the repository or the website.
 
+## Khmer PDF OCR (standalone)
+
+`ocr/index.html` is a single file that extracts Khmer and English text from a PDF in the browser and writes it as Markdown, tables and headings included. Open it directly or serve the folder; it needs no build step and no server.
+
+It reads a page from the PDF's own text layer when that layer is sound, and falls back to Tesseract OCR (`khm`, `eng`) when the layer is missing or damaged — the usual case for Khmer PDFs, whose shaped glyphs map back to no Unicode at all. Khmer output is put in storage order: pre-base vowels move after their consonant, `េ`+`ី` becomes `ើ`, coeng sub-consonants stay with their base, deprecated characters are replaced, and the whole text is normalized to NFC. OCR words below a confidence you choose are listed for checking against the page image.
+
+PDF.js and Tesseract.js are fetched from a CDN on first use, and the language data from `tessdata.projectnaptha.com` (the Advanced panel takes another host if yours is blocked). The PDF itself never leaves the machine.
+
 ## Project layout
 
 ```
 engine/            language engine (runs in the browser and in Node.js)
 public/            web app (index.html, app.js, worker.js, styles.css)
+ocr/                standalone Khmer/English PDF OCR page (one file, no build, no server)
 server/            Node server: static files, PDF reports, PDF text, optional AI
 data/              built lexicon, curated lists, licences
 scripts/           lexicon build, vendor copy, static build, textbook OCR

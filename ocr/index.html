@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Khmer PDF OCR</title>
+<meta name="description" content="Extract Khmer and English text from PDFs in the browser: embedded text layer or Tesseract OCR, with tables and layout kept as Markdown.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&family=Noto+Sans+Mono:wght@400&display=swap">
+<style>
+:root{
+  --bg:#fbfaf8; --panel:#ffffff; --ink:#1c1b19; --ink-soft:#5d5a54; --line:#e3dfd7;
+  --accent:#8a4b2a; --accent-ink:#ffffff; --ok:#2f6f4f; --warn:#8a6a1f; --bad:#9a3326;
+  --shadow:0 1px 2px rgba(28,27,25,.06), 0 8px 24px rgba(28,27,25,.05);
+  --radius:10px; --mono:"Noto Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --khmer:"Noto Sans Khmer","Khmer OS Battambang","Khmer OS","Hanuman",serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#171614; --panel:#201f1c; --ink:#f0ece5; --ink-soft:#a9a39a; --line:#36332e;
+    --accent:#d98b5f; --accent-ink:#1c1b19; --ok:#79c79b; --warn:#e0bd6b; --bad:#e8907f;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171614; --panel:#201f1c; --ink:#f0ece5; --ink-soft:#a9a39a; --line:#36332e;
+  --accent:#d98b5f; --accent-ink:#1c1b19; --ok:#79c79b; --warn:#e0bd6b; --bad:#e8907f;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  font-size:16px; line-height:1.55; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:24px 16px 72px}
+header.top{display:flex; flex-wrap:wrap; gap:12px; align-items:baseline; justify-content:space-between; margin-bottom:18px}
+h1{font-size:1.5rem; margin:0; letter-spacing:-.01em}
+h1 .kh{font-family:var(--khmer); font-weight:600}
+.sub{color:var(--ink-soft); font-size:.92rem; margin:4px 0 0; max-width:62ch}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow)}
+.pad{padding:16px}
+.grid{display:grid; gap:16px; grid-template-columns:minmax(260px,320px) 1fr; align-items:start}
+@media (max-width:860px){ .grid{grid-template-columns:1fr} }
+.drop{
+  border:2px dashed var(--line); border-radius:var(--radius); padding:22px 16px; text-align:center;
+  cursor:pointer; transition:border-color .15s, background .15s; background:var(--panel);
+}
+.drop:hover,.drop.over{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 6%, var(--panel))}
+.drop strong{display:block; font-size:1rem}
+.drop span{color:var(--ink-soft); font-size:.86rem}
+fieldset{border:0; margin:0; padding:0}
+.field{margin:14px 0}
+.field label,.field legend{display:block; font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:6px}
+select,input[type=text],input[type=number],textarea{
+  width:100%; font:inherit; color:inherit; background:var(--bg);
+  border:1px solid var(--line); border-radius:8px; padding:8px 10px;
+}
+input[type=range]{width:100%; accent-color:var(--accent)}
+.check{display:flex; gap:9px; align-items:flex-start; margin:8px 0; font-size:.92rem}
+.check input{margin-top:3px; accent-color:var(--accent)}
+.check .hint{display:block; color:var(--ink-soft); font-size:.8rem}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+.row>*{flex:1 1 0}
+button{
+  font:inherit; font-weight:600; border:1px solid var(--line); background:var(--panel); color:var(--ink);
+  padding:9px 14px; border-radius:8px; cursor:pointer;
+}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.5; cursor:not-allowed}
+button.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+button.small{padding:5px 10px; font-size:.85rem; font-weight:500}
+.status{margin-top:14px; font-size:.9rem; min-height:1.4em; color:var(--ink-soft)}
+.bar{height:6px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:8px}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .2s}
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); padding:0 8px; flex-wrap:wrap}
+.tabs button{border:0; background:none; border-bottom:2px solid transparent; border-radius:0; padding:10px 12px; color:var(--ink-soft); font-weight:500}
+.tabs button[aria-selected=true]{color:var(--ink); border-bottom-color:var(--accent); font-weight:600}
+.toolbar{display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--line); align-items:center}
+.toolbar .spacer{flex:1}
+.out{padding:0}
+pre.code{
+  margin:0; padding:16px; max-height:62vh; overflow:auto; white-space:pre-wrap; word-break:break-word;
+  font-family:var(--mono); font-size:.86rem; line-height:1.7;
+}
+pre.code:lang(km),.kh,.khmer-text{font-family:var(--khmer)}
+.preview{padding:16px 20px; max-height:62vh; overflow:auto}
+.preview h1,.preview h2,.preview h3{line-height:1.3; margin:1.2em 0 .4em}
+.preview h1{font-size:1.35rem} .preview h2{font-size:1.15rem} .preview h3{font-size:1rem}
+.preview p,.preview li{font-family:var(--khmer); font-size:1rem}
+.preview table{border-collapse:collapse; width:100%; margin:1em 0; font-size:.92rem; font-family:var(--khmer)}
+.preview th,.preview td{border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top}
+.preview th{background:color-mix(in srgb, var(--accent) 8%, var(--panel))}
+.preview hr{border:0; border-top:1px solid var(--line); margin:1.6em 0}
+.pages{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); padding:16px}
+.page-card{border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--bg)}
+.page-card canvas{display:block; width:100%; height:auto}
+.page-card .meta{padding:6px 8px; font-size:.76rem; color:var(--ink-soft); display:flex; justify-content:space-between; gap:6px}
+.stats{display:flex; gap:16px; flex-wrap:wrap; padding:12px 16px; border-top:1px solid var(--line); font-size:.85rem; color:var(--ink-soft)}
+.stats b{color:var(--ink); font-weight:600}
+.flag{color:var(--warn)} .err{color:var(--bad)} .good{color:var(--ok)}
+.lowconf{padding:0 16px 16px; font-size:.88rem}
+.lowconf ul{margin:.4em 0; padding-left:1.2em; columns:2; column-gap:24px}
+.lowconf li{font-family:var(--khmer)}
+details.help{margin-top:16px; font-size:.88rem; color:var(--ink-soft)}
+details.help summary{cursor:pointer; font-weight:600; color:var(--ink)}
+details.help code{font-family:var(--mono); font-size:.85em}
+footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:80ch}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+.theme-toggle{border-radius:99px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <h1>Khmer PDF OCR <span class="kh">· ស្រង់អត្ថបទពី PDF</span></h1>
+    <p class="sub">Reads Khmer and English PDFs in your browser. It uses the file's own text layer where there is a sound one, and Tesseract OCR where the text layer is missing or comes back broken — as it does in many Khmer PDFs, whose shaped glyphs map back to nothing. The result is written as Markdown, with tables and headings kept. Nothing leaves your machine except the one-time download of the OCR engine and language data.</p>
+  </div>
+  <button class="theme-toggle small" id="theme" type="button" aria-label="Switch colour theme">◐ Theme</button>
+</header>
+
+<div class="grid">
+  <!-- ─── controls ─── -->
+  <form class="panel pad" id="controls" autocomplete="off">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose a PDF file">
+      <strong id="dropName">Choose a PDF</strong>
+      <span id="dropHint">or drop one here</span>
+      <input type="file" id="file" accept="application/pdf,.pdf" class="sr">
+    </div>
+
+    <div class="field">
+      <label for="mode">Extraction</label>
+      <select id="mode">
+        <option value="auto" selected>Auto — text layer, OCR when thin or damaged</option>
+        <option value="text">Text layer only</option>
+        <option value="ocr">OCR every page</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="langs">OCR languages</label>
+      <select id="langs">
+        <option value="khm+eng" selected>Khmer + English</option>
+        <option value="khm">Khmer only</option>
+        <option value="eng">English only</option>
+        <option value="khm+eng+fra">Khmer + English + French</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="pages">Pages <span id="pagesHint" style="text-transform:none;letter-spacing:0"></span></label>
+      <input type="text" id="pages" placeholder="all, or 1-4, 7, 11-" value="">
+    </div>
+
+    <div class="field">
+      <label for="dpi">OCR resolution — <span id="dpiOut">300</span> dpi</label>
+      <input type="range" id="dpi" min="150" max="600" step="50" value="300">
+    </div>
+
+    <fieldset class="field">
+      <legend>Layout</legend>
+      <label class="check"><input type="checkbox" id="optTables" checked>
+        <span>Detect tables<span class="hint">Aligned column gaps across rows become Markdown pipe tables.</span></span></label>
+      <label class="check"><input type="checkbox" id="optHeadings" checked>
+        <span>Detect headings<span class="hint">Lines set in noticeably larger type become <code>#</code> headings.</span></span></label>
+      <label class="check"><input type="checkbox" id="optLists" checked>
+        <span>Detect lists<span class="hint">Bullets and numbers, Khmer numerals included.</span></span></label>
+      <label class="check"><input type="checkbox" id="optJoin" checked>
+        <span>Reflow paragraphs<span class="hint">Join wrapped lines; keep a break where a paragraph ends.</span></span></label>
+      <label class="check"><input type="checkbox" id="optPageHeads" checked>
+        <span>Page markers<span class="hint">A rule and <code>## Page n</code> between pages.</span></span></label>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>Khmer text</legend>
+      <label class="check"><input type="checkbox" id="optNFC" checked>
+        <span>Unicode NFC<span class="hint">Normalization form C over the whole output.</span></span></label>
+      <label class="check"><input type="checkbox" id="optReorder" checked>
+        <span>Canonical cluster order<span class="hint">Robat, coeng + sub-consonant, shifter, vowel, sign — put back in storage order, duplicates dropped.</span></span></label>
+      <label class="check"><input type="checkbox" id="optLegacy" checked>
+        <span>Replace deprecated characters<span class="hint">ឣ ឤ and the inherent-vowel signs U+17B4/17B5.</span></span></label>
+      <label class="check"><input type="checkbox" id="optVisual" checked>
+        <span>Repair visual order<span class="hint">Pre-base vowels <span class="kh">េ ែ ៃ</span> moved after their consonant, and <span class="kh">ើ ោ ឿ</span> made whole again — for shaped or legacy-font PDFs.</span></span></label>
+      <label class="check"><input type="checkbox" id="optZWSP">
+        <span>Zero-width spaces to spaces<span class="hint">Off keeps U+200B word breaks as they are.</span></span></label>
+    </fieldset>
+
+    <div class="row">
+      <button class="primary" id="run" type="submit" disabled>Extract</button>
+      <button id="cancel" type="button" disabled>Stop</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="bar"><i id="bar"></i></div>
+
+    <details class="help">
+      <summary>Advanced</summary>
+      <div class="field">
+        <label for="tessdata">Tesseract language data</label>
+        <input type="text" id="tessdata" value="https://tessdata.projectnaptha.com/4.0.0">
+        <span class="hint" style="display:block;color:var(--ink-soft);font-size:.8rem;margin-top:4px">If that host is blocked on your network, one language at a time also works from <code>https://cdn.jsdelivr.net/npm/@tesseract.js-data/khm@1.0.0/4.0.0</code>.</span>
+      </div>
+      <div class="field">
+        <label for="psm">Page segmentation</label>
+        <select id="psm">
+          <option value="3" selected>Automatic (3)</option>
+          <option value="4">Columns of text (4)</option>
+          <option value="6">One uniform block (6)</option>
+          <option value="11">Sparse text (11)</option>
+          <option value="12">Sparse text with layout (12)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="confMin">Flag words below <span id="confOut">70</span>% confidence</label>
+        <input type="range" id="confMin" min="0" max="95" step="5" value="70">
+      </div>
+    </details>
+  </form>
+
+  <!-- ─── output ─── -->
+  <section class="panel out" aria-label="Extracted text">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-md" aria-selected="true" aria-controls="view-md">Markdown</button>
+      <button type="button" role="tab" id="tab-pv" aria-selected="false" aria-controls="view-pv">Preview</button>
+      <button type="button" role="tab" id="tab-tx" aria-selected="false" aria-controls="view-tx">Plain text</button>
+      <button type="button" role="tab" id="tab-pg" aria-selected="false" aria-controls="view-pg">Pages</button>
+    </div>
+    <div class="toolbar">
+      <button class="small" id="copy" type="button" disabled>Copy</button>
+      <button class="small" id="download" type="button" disabled>Download .md</button>
+      <span class="spacer"></span>
+      <span id="copied" class="good" style="font-size:.85rem"></span>
+    </div>
+    <div id="view-md" role="tabpanel" aria-labelledby="tab-md"><pre class="code kh" id="md">Choose a PDF to begin.</pre></div>
+    <div id="view-pv" role="tabpanel" aria-labelledby="tab-pv" hidden><div class="preview" id="pv"></div></div>
+    <div id="view-tx" role="tabpanel" aria-labelledby="tab-tx" hidden><pre class="code kh" id="tx"></pre></div>
+    <div id="view-pg" role="tabpanel" aria-labelledby="tab-pg" hidden><div class="pages" id="pg"></div></div>
+    <div class="stats" id="stats" hidden></div>
+    <div class="lowconf" id="lowconf" hidden></div>
+  </section>
+</div>
+
+<footer class="foot">
+  <p>OCR is a starting point for transcription, never a source to quote. Khmer OCR commonly loses a coeng or a vowel sign — read the page image beside the text before you rely on it. The engine (<a href="https://github.com/naptha/tesseract.js">Tesseract.js</a>, Apache-2.0) and the rendering library (<a href="https://mozilla.github.io/pdf.js/">PDF.js</a>, Apache-2.0) are fetched from a CDN on first use; the PDF itself is read locally and never uploaded.</p>
+</footer>
+</div>
+
+<script type="module">
+'use strict';
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 sources \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+const PDFJS        = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.min.mjs';
+const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/pdf.worker.min.mjs';
+const TESS         = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+const TESS_WORKER  = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js';
+const TESS_CORE    = 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/';
+const PDFJS_CMAPS  = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/';
+const PDFJS_FONTS  = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/';
+const MAX_CANVAS   = 4200;   // longest canvas edge, in pixels
+const TEXT_THIN    = 120;    // characters below which a text layer counts as absent
+const DAMAGE_MAX   = 0.08;   // damage score above which a Khmer text layer is not trusted
+
+const $ = (id) => document.getElementById(id);
+const el = {
+  file:$('file'), drop:$('drop'), dropName:$('dropName'), dropHint:$('dropHint'),
+  mode:$('mode'), langs:$('langs'), pages:$('pages'), pagesHint:$('pagesHint'),
+  dpi:$('dpi'), dpiOut:$('dpiOut'), tessdata:$('tessdata'), psm:$('psm'),
+  confMin:$('confMin'), confOut:$('confOut'),
+  run:$('run'), cancel:$('cancel'), status:$('status'), bar:$('bar'),
+  md:$('md'), pv:$('pv'), tx:$('tx'), pg:$('pg'), stats:$('stats'), lowconf:$('lowconf'),
+  copy:$('copy'), download:$('download'), copied:$('copied'), form:$('controls'),
+  theme:$('theme'),
+  opt:{
+    tables:$('optTables'), headings:$('optHeadings'), lists:$('optLists'), join:$('optJoin'),
+    pageHeads:$('optPageHeads'), nfc:$('optNFC'), reorder:$('optReorder'),
+    legacy:$('optLegacy'), zwsp:$('optZWSP'), visual:$('optVisual'),
+  },
+};
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Khmer text repair \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Khmer stores a syllable as a base consonant followed by marks whose order
+   is fixed: robat, then any coeng + sub-consonant pairs, then a register
+   shifter, then a dependent vowel, then a sign. OCR and older PDF producers
+   emit these out of order, which renders wrongly and breaks string search.
+   We parse each cluster, sort its parts by that rank, and drop repeats.    */
+
+const CP = (s, i = 0) => s.codePointAt(i);
+const isBase       = (c) => (c >= 0x1780 && c <= 0x17a2) || (c >= 0x17a5 && c <= 0x17b3);
+const isKhmerDigit = (c) => c >= 0x17e0 && c <= 0x17e9;
+const COENG = 0x17d2;
+
+function markRank(c) {
+  if (c === 0x17cc) return 1;                        // robat
+  if (c === COENG) return 2;                         // coeng + sub-consonant
+  if (c === 0x17c9 || c === 0x17ca) return 3;        // muusikatoan, triisap
+  if (c >= 0x17b6 && c <= 0x17c5) return 4;          // dependent vowels
+  if (c >= 0x17c6 && c <= 0x17c8) return 5;          // nikahit, reahmuk, yuukaleapintu
+  if (c === 0x17cb || (c >= 0x17cd && c <= 0x17d1) || c === 0x17dd) return 6;
+  if (c === 0x200c || c === 0x200d) return 7;        // ZWNJ, ZWJ: keep, but last
+  return 0;                                          // not a mark
+}
+const isMark = (c) => markRank(c) > 0;
+
+const DEPRECATED = new Map([
+  ['\u17a3', '\u17a2'],          // QAQ -> QA
+  ['\u17a4', '\u17a2\u17b6'],    // QAA -> QA + AA
+  ['\u17b4', ''],                // inherent vowel AQ: not for text
+  ['\u17b5', ''],                // inherent vowel AA: not for text
+  ['\u17d3', '\u17c6'],          // bathamasat -> nikahit (a common legacy misuse)
+]);
+
+/** Reorder the marks of every Khmer cluster into storage order. */
+function reorderClusters(s) {
+  let out = '';
+  let i = 0;
+  while (i < s.length) {
+    const c = CP(s, i);
+    if (!isBase(c) && !isKhmerDigit(c)) { out += s[i++]; continue; }
+    let base = s[i++];
+    const parts = [];
+    while (i < s.length) {
+      const m = CP(s, i);
+      if (!isMark(m)) break;
+      if (m === COENG) {
+        const next = i + 1 < s.length ? s[i + 1] : '';
+        if (next && isBase(CP(next))) { parts.push({ rank: 2, text: s[i] + next }); i += 2; }
+        else { i += 1; }                              // dangling coeng: drop
+        continue;
+      }
+      parts.push({ rank: markRank(m), text: s[i] });
+      i += 1;
+    }
+    // stable sort by rank, then drop exact duplicates and a second shifter/vowel repeat
+    parts.forEach((p, n) => { p.n = n; });
+    parts.sort((a, b) => a.rank - b.rank || a.n - b.n);
+    const seen = new Set();
+    let text = base;
+    for (const p of parts) {
+      const key = p.rank === 2 ? p.text : p.rank + ':' + p.text;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      text += p.text;
+    }
+    out += text;
+  }
+  return out;
+}
+
+/* Pre-base vowels (e, ae, ai) are drawn to the left of their consonant, so a
+   PDF whose text layer was written in drawing order, and legacy-font text,
+   store them before the base. Khmer also writes some vowels as a pre-base
+   part plus an above or post part: oe is e + i, oo is e + aa, ya is e + y.
+   This pass puts the vowel after its base and makes those pairs whole again. */
+const PRE_VOWEL = new Set([0x17c1, 0x17c2, 0x17c3]);
+const PRE_PAIRS = new Map([['\u17b8', '\u17be'], ['\u17b6', '\u17c4'], ['\u17b9', '\u17bf']]);
+
+function repairVisualOrder(s) {
+  let out = '';
+  let i = 0;
+  while (i < s.length) {
+    const c = CP(s, i);
+    if (!PRE_VOWEL.has(c) || i + 1 >= s.length || !isBase(CP(s, i + 1))) { out += s[i++]; continue; }
+    let j = i + 1;
+    const base = s[j++];
+    const marks = [];
+    while (j < s.length) {
+      const m = CP(s, j);
+      if (m === COENG && j + 1 < s.length && isBase(CP(s, j + 1))) { marks.push(s[j] + s[j + 1]); j += 2; continue; }
+      if (isMark(m)) { marks.push(s[j]); j += 1; continue; }
+      break;
+    }
+    let vowel = String.fromCodePoint(c);
+    if (c === 0x17c1) {
+      const at = marks.findIndex((m) => PRE_PAIRS.has(m));
+      if (at !== -1) { vowel = PRE_PAIRS.get(marks[at]); marks.splice(at, 1); }
+    }
+    out += base + marks.join('') + vowel;
+    i = j;
+  }
+  return out;
+}
+
+/* How much of a Khmer text layer is damaged. Shaped or legacy PDFs lose the
+   parts of a ligature that carry no Unicode mapping and leave marks with no
+   base; OCR reads such a page better than its own text layer does. */
+function khmerDamage(text) {
+  const letters = (text.match(/[\u1780-\u17a2\u17a5-\u17b3]/g) || []).length;
+  if (letters < 20) return { score: 0, letters, dotted: 0, orphans: 0, fragments: 0 };
+  const dotted = (text.match(/\u25cc/g) || []).length;
+  const orphans = (text.match(/(^|[\s\u200b\u17d4\u17d5.,;:()[\]|])[\u17b6-\u17d3]/g) || []).length;
+  // A lone consonant with nothing attached, or a mark adrift with no base,
+  // is what a dropped ligature glyph leaves behind. Khmer word breaks (U+200B)
+  // are legitimate, so only real whitespace separates candidates here.
+  const tokens = text.split(/\s+/).filter((w) => /[\u1780-\u17dd]/.test(w));
+  const fragments = tokens.length >= 4
+    ? tokens.filter((w) => /^[\u1780-\u17a2\u17a5-\u17b3]$/.test(w)
+                        || /^[\u17b6-\u17d3]+$/.test(w)).length
+    : 0;
+  const score = (dotted * 3 + orphans * 2 + fragments * 2) / letters;
+  return { score, letters, dotted, orphans, fragments };
+}
+
+function normalizeKhmer(s, o) {
+  if (!s) return '';
+  let t = s;
+  if (o.legacy) for (const [from, to] of DEPRECATED) t = t.split(from).join(to);
+  t = t.replace(/[\u00ad\u200e\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g, ''); // soft hyphen, bidi marks
+  if (o.zwsp) t = t.replace(/\u200b+/g, ' ');
+  if (o.visual) t = repairVisualOrder(t);
+  if (o.reorder) t = reorderClusters(t);
+  if (o.nfc && t.normalize) t = t.normalize('NFC');
+  return t;
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 geometry helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+const median = (xs) => {
+  if (!xs.length) return 0;
+  const a = [...xs].sort((x, y) => x - y);
+  const m = a.length >> 1;
+  return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+};
+const KH_MARK_START = /^[\u17b4-\u17d3\u17dd\u200c\u200d]/;
+const KH_END        = /[\u1780-\u17dd]$/;
+const KH_START      = /^[\u1780-\u17dd]/;
+
+/** Join the boxes of one line into a string, inserting spaces only where a gap earns one. */
+function joinLine(items) {
+  const widths = items.map((it) => (it.x1 - it.x0) / Math.max(1, [...it.text].length));
+  const charW = median(widths.filter((w) => w > 0)) || 4;
+  const h = median(items.map((it) => it.y1 - it.y0)) || 10;
+  // A space in print runs about a third of an em wide; take the narrower estimate.
+  const minGap = Math.min(charW * 0.5, h * 0.28);
+  let s = items[0].text;
+  for (let i = 1; i < items.length; i++) {
+    const cur = items[i].text;
+    const gap = items[i].x0 - items[i - 1].x1;
+    // Never break a Khmer cluster: a leading mark, or a trailing coeng, belongs to its base.
+    const tight = KH_MARK_START.test(cur) || items[i - 1].text.endsWith('\u17d2');
+    const spaced = /\s$/.test(s) || /^\s/.test(cur);
+    if (!tight && !spaced && gap > minGap) s += ' ';
+    s += cur;
+  }
+  return s.replace(/[ \t]{2,}/g, ' ').trim();
+}
+
+/** Group word/run boxes into lines, top to bottom. */
+function groupLines(items) {
+  const good = items.filter((it) => it.text && it.text.trim() !== '');
+  if (!good.length) return [];
+  const h = median(good.map((it) => it.y1 - it.y0)) || 10;
+  const sorted = [...good].sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2 || a.x0 - b.x0);
+  const lines = [];
+  for (const it of sorted) {
+    const mid = (it.y0 + it.y1) / 2;
+    const last = lines[lines.length - 1];
+    if (last && Math.abs(mid - last.mid) <= h * 0.55) {
+      last.items.push(it);
+      last.mid = (last.mid * (last.items.length - 1) + mid) / last.items.length;
+    } else {
+      lines.push({ items: [it], mid });
+    }
+  }
+  return lines.map((l) => {
+    l.items.sort((a, b) => a.x0 - b.x0);
+    return {
+      items: l.items,
+      text: joinLine(l.items),
+      x0: Math.min(...l.items.map((i) => i.x0)),
+      x1: Math.max(...l.items.map((i) => i.x1)),
+      y0: Math.min(...l.items.map((i) => i.y0)),
+      y1: Math.max(...l.items.map((i) => i.y1)),
+      height: median(l.items.map((i) => i.y1 - i.y0)) || h,
+    };
+  }).filter((l) => l.text !== '');
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 table detection \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   A table shows itself as the same wide gaps appearing at the same x on
+   several neighbouring lines. We find each line's wide gaps, cluster their
+   centres across the run, and keep the clusters that most of the lines share. */
+function findTables(lines, pageWidth) {
+  const bodyH = median(lines.map((l) => l.height)) || 10;
+  const gapMin = Math.max(pageWidth * 0.022, bodyH * 1.1);
+  const tol = pageWidth * 0.02;
+
+  const gapsOf = (line) => {
+    const g = [];
+    for (let i = 1; i < line.items.length; i++) {
+      const from = line.items[i - 1].x1, to = line.items[i].x0;
+      if (to - from >= gapMin) g.push((from + to) / 2);
+    }
+    return g;
+  };
+  const gaps = lines.map(gapsOf);
+  const blocks = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (gaps[i].length === 0) { blocks.push({ table: false, from: i, to: i }); i++; continue; }
+    let j = i;
+    while (j + 1 < lines.length
+           && gaps[j + 1].length > 0
+           && lines[j + 1].y0 - lines[j].y1 < bodyH * 1.9) j++;
+    const run = [];
+    for (let k = i; k <= j; k++) run.push(gaps[k]);
+    // cluster gap centres shared by the run
+    const all = run.flat().sort((a, b) => a - b);
+    const clusters = [];
+    for (const x of all) {
+      const last = clusters[clusters.length - 1];
+      if (last && x - last.at(-1) <= tol) last.push(x);
+      else clusters.push([x]);
+    }
+    const need = Math.max(2, Math.ceil(run.length * 0.6));
+    const bounds = clusters
+      .filter((c) => {
+        const lo = c[0] - tol, hi = c.at(-1) + tol;
+        return run.filter((g) => g.some((x) => x >= lo && x <= hi)).length >= Math.min(need, run.length);
+      })
+      .map((c) => c.reduce((a, b) => a + b, 0) / c.length);
+    if (run.length >= 2 && bounds.length >= 1) blocks.push({ table: true, from: i, to: j, bounds });
+    else for (let k = i; k <= j; k++) blocks.push({ table: false, from: k, to: k });
+    i = j + 1;
+  }
+  return blocks;
+}
+
+const escapeCell = (s) => s.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
+
+function tableToMarkdown(lines, bounds) {
+  const edges = [-Infinity, ...bounds, Infinity];
+  const cols = edges.length - 1;
+  const rows = lines.map((line) => {
+    const cells = Array.from({ length: cols }, () => []);
+    for (const it of line.items) {
+      const mid = (it.x0 + it.x1) / 2;
+      let c = 0;
+      while (c < cols - 1 && mid >= edges[c + 1]) c++;
+      cells[c].push(it);
+    }
+    return cells.map((group) => (group.length ? escapeCell(joinLine(group)) : ''));
+  }).filter((r) => r.some((c) => c !== ''));
+  if (rows.length < 2) return null;
+  const head = rows[0];
+  const out = [
+    '| ' + head.join(' | ') + ' |',
+    '| ' + head.map(() => '---').join(' | ') + ' |',
+    ...rows.slice(1).map((r) => '| ' + r.join(' | ') + ' |'),
+  ];
+  return out.join('\n');
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 line classification \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+const BULLET = /^\s*([\u2022\u00b7\u2023\u25aa\u25cf\u2043\u2219*\u2013\u2014-]|o\s)\s*/;
+const NUMBER = /^\s*\(?([0-9]{1,3}|[\u17e0-\u17e9]{1,3}|[ivxIVX]{1,4})\s*[.)\u17d4\u17d5:]\s+/;
+
+function classify(line, bodyH, opts) {
+  const t = line.text;
+  if (opts.headings) {
+    const ratio = line.height / bodyH;
+    const short = [...t].length <= 120;
+    if (short && ratio >= 1.55) return { kind: 'h', level: 1 };
+    if (short && ratio >= 1.28) return { kind: 'h', level: 2 };
+    if (short && ratio >= 1.12) return { kind: 'h', level: 3 };
+  }
+  if (opts.lists) {
+    if (BULLET.test(t)) return { kind: 'ul' };
+    if (NUMBER.test(t)) return { kind: 'ol' };
+  }
+  return { kind: 'p' };
+}
+
+/** Turn one page's line boxes into Markdown. */
+function layoutToMarkdown(lines, pageWidth, opts) {
+  if (!lines.length) return '';
+  const bodyH = median(lines.map((l) => l.height)) || 10;
+  const lineGap = median(lines.slice(1).map((l, i) => l.y0 - lines[i].y1).filter((g) => g > 0)) || bodyH * 0.4;
+  const blocks = opts.tables ? findTables(lines, pageWidth) : lines.map((_, i) => ({ table: false, from: i, to: i }));
+  const right = Math.max(...lines.map((l) => l.x1));
+  const chunks = [];
+  let para = [];
+  const flush = () => { if (para.length) { chunks.push(para.join(opts.join ? '' : '\n')); para = []; } };
+
+  for (const b of blocks) {
+    if (b.table) {
+      const md = tableToMarkdown(lines.slice(b.from, b.to + 1), b.bounds);
+      if (md) { flush(); chunks.push(md); continue; }
+      // not convincing as a table after all: fall through as text
+      for (let k = b.from; k <= b.to; k++) addText(lines[k], k);
+      continue;
+    }
+    addText(lines[b.from], b.from);
+  }
+  flush();
+  return chunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+
+  function addText(line, index) {
+    const cls = classify(line, bodyH, opts);
+    const prev = lines[index - 1];
+    const gapBefore = prev ? line.y0 - prev.y1 : 0;
+    const newBlock = !prev || gapBefore > lineGap * 1.8 || cls.kind !== 'p'
+      || (prev && prev.x1 < right - bodyH * 3 && /[.\u17d4\u17d5:!?]$/.test(prev.text.trim()));
+    if (newBlock) flush();
+
+    if (cls.kind === 'h') { chunks.push('#'.repeat(cls.level) + ' ' + line.text); return; }
+    if (cls.kind === 'ul') { chunks.push('- ' + line.text.replace(BULLET, '')); return; }
+    if (cls.kind === 'ol') {
+      const m = line.text.match(NUMBER);
+      chunks.push(`${m[1]}. ` + line.text.slice(m[0].length));
+      return;
+    }
+    if (!opts.join) { para.push(line.text); return; }
+    if (!para.length) { para.push(line.text); return; }
+    const last = para[para.length - 1];
+    if (/-$/.test(last) && /^[a-zA-Z]/.test(line.text)) para[para.length - 1] = last.slice(0, -1) + line.text;
+    else if (KH_END.test(last) && KH_START.test(line.text)) para[para.length - 1] = last + line.text;
+    else para[para.length - 1] = last + ' ' + line.text;
+  }
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 library loading \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+let pdfjsPromise = null;
+function loadPdfjs() {
+  if (!pdfjsPromise) {
+    pdfjsPromise = import(PDFJS).then((mod) => {
+      mod.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+      return mod;
+    });
+  }
+  return pdfjsPromise;
+}
+let tessPromise = null;
+function loadTesseract() {
+  if (!tessPromise) {
+    tessPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = TESS;
+      s.onload = () => (window.Tesseract ? resolve(window.Tesseract) : reject(new Error('Tesseract did not load')));
+      s.onerror = () => reject(new Error('Could not fetch Tesseract.js from the CDN'));
+      document.head.appendChild(s);
+    });
+  }
+  return tessPromise;
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 PDF text layer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+async function textLayerBoxes(page, pdfjs) {
+  const viewport = page.getViewport({ scale: 1 });
+  const content = await page.getTextContent({ includeMarkedContent: false });
+  const boxes = [];
+  for (const item of content.items) {
+    if (!item.str || item.str.trim() === '') continue;
+    const tm = pdfjs.Util.transform(viewport.transform, item.transform);
+    // item.width and item.height already carry the text matrix; they need no scaling.
+    const h = Math.abs(item.height) || Math.hypot(tm[2], tm[3]) || 10;
+    const w = Math.abs(item.width) || 0;
+    const x0 = tm[4];
+    const y1 = tm[5];                        // the baseline, in device space
+    boxes.push({ text: item.str, x0, x1: x0 + w, y0: y1 - h, y1, conf: 100 });
+  }
+  return { boxes, width: viewport.width, height: viewport.height };
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 page rendering \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+async function renderPage(page, dpi) {
+  let scale = dpi / 72;
+  const base = page.getViewport({ scale: 1 });
+  const longest = Math.max(base.width, base.height) * scale;
+  if (longest > MAX_CANVAS) scale *= MAX_CANVAS / longest;
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport, intent: 'print' }).promise;
+  return { canvas, scale };
+}
+
+function thumbnail(canvas, maxW = 340) {
+  const out = document.createElement('canvas');
+  const r = Math.min(1, maxW / canvas.width);
+  out.width = Math.round(canvas.width * r);
+  out.height = Math.round(canvas.height * r);
+  out.getContext('2d').drawImage(canvas, 0, 0, out.width, out.height);
+  return out;
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 OCR \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+let ocrWorker = null, ocrLangs = null, ocrPath = null;
+async function getOcrWorker(langs, langPath, onProgress) {
+  if (ocrWorker && ocrLangs === langs && ocrPath === langPath) return ocrWorker;
+  if (ocrWorker) { try { await ocrWorker.terminate(); } catch { /* already gone */ } ocrWorker = null; }
+  const Tesseract = await loadTesseract();
+  ocrWorker = await Tesseract.createWorker(langs, 1, {
+    workerPath: TESS_WORKER,
+    corePath: TESS_CORE,
+    langPath,
+    logger: (m) => {
+      if (!onProgress) return;
+      const pct = typeof m.progress === 'number' ? Math.round(m.progress * 100) : null;
+      onProgress(`${m.status}${pct === null ? '' : ' ' + pct + '%'}`);
+    },
+  });
+  ocrLangs = langs; ocrPath = langPath;
+  return ocrWorker;
+}
+
+/** Words with boxes, in canvas pixels, from Tesseract's block tree or TSV. */
+function ocrBoxes(data) {
+  const out = [];
+  if (Array.isArray(data.blocks) && data.blocks.length) {
+    for (const block of data.blocks)
+      for (const para of block.paragraphs || [])
+        for (const line of para.lines || [])
+          for (const w of line.words || []) {
+            if (!w.text || !w.text.trim()) continue;
+            const b = w.bbox || {};
+            out.push({ text: w.text, x0: b.x0 ?? 0, x1: b.x1 ?? 0, y0: b.y0 ?? 0, y1: b.y1 ?? 0, conf: w.confidence ?? 0 });
+          }
+    if (out.length) return out;
+  }
+  if (typeof data.tsv === 'string' && data.tsv) {
+    for (const row of data.tsv.split('\n')) {
+      const f = row.split('\t');
+      if (f.length < 12 || f[0] !== '5') continue;          // level 5 = word
+      const text = f[11];
+      if (!text || !text.trim()) continue;
+      const left = +f[6], top = +f[7], w = +f[8], h = +f[9];
+      out.push({ text, x0: left, x1: left + w, y0: top, y1: top + h, conf: +f[10] });
+    }
+  }
+  return out;
+}
+
+async function ocrPage(canvas, settings, onProgress) {
+  const worker = await getOcrWorker(settings.langs, settings.langPath, onProgress);
+  await worker.setParameters({
+    tessedit_pageseg_mode: String(settings.psm),
+    preserve_interword_spaces: '1',
+    user_defined_dpi: String(settings.dpi),
+  });
+  const { data } = await worker.recognize(canvas, {}, { text: true, blocks: true, tsv: true });
+  return { boxes: ocrBoxes(data), text: data.text || '', confidence: data.confidence ?? null };
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 page ranges \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+function parseRange(spec, total) {
+  const s = (spec || '').trim();
+  if (!s || /^all$/i.test(s)) return Array.from({ length: total }, (_, i) => i + 1);
+  const keep = new Set();
+  for (const part of s.split(',')) {
+    const p = part.trim();
+    if (!p) continue;
+    let m = p.match(/^(\d+)\s*[-\u2013]\s*(\d*)$/);
+    if (m) {
+      const from = Math.max(1, +m[1]);
+      const to = m[2] ? Math.min(total, +m[2]) : total;
+      for (let i = from; i <= to; i++) keep.add(i);
+      continue;
+    }
+    m = p.match(/^(\d+)$/);
+    if (m && +m[1] >= 1 && +m[1] <= total) keep.add(+m[1]);
+  }
+  return [...keep].sort((a, b) => a - b);
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 the run \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+let job = null;            // { cancelled }
+let result = null;         // { markdown, plain, pages:[...] }
+
+function setStatus(msg, cls = '') { el.status.className = 'status ' + cls; el.status.textContent = msg; }
+function setBar(frac) { el.bar.style.width = Math.max(0, Math.min(1, frac)) * 100 + '%'; }
+
+async function extract(file, settings) {
+  const pdfjs = await loadPdfjs();
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({
+    data: bytes, isEvalSupported: false,
+    cMapUrl: PDFJS_CMAPS, cMapPacked: true, standardFontDataUrl: PDFJS_FONTS,
+  }).promise;
+  const wanted = parseRange(settings.pages, pdf.numPages);
+  if (!wanted.length) throw new Error('That page range selects nothing.');
+
+  const pages = [];
+  for (let n = 0; n < wanted.length; n++) {
+    if (job.cancelled) throw new Error('cancelled');
+    const num = wanted[n];
+    const done = n / wanted.length;
+    setBar(done);
+    setStatus(`Page ${num} of ${pdf.numPages} \u2014 reading`);
+    const page = await pdf.getPage(num);
+    const record = { number: num, source: '', markdown: '', plain: '', confidence: null, low: [], thumb: null, note: '' };
+
+    let boxes = [], pageWidth = 0, plain = '';
+    if (settings.mode !== 'ocr') {
+      const t = await textLayerBoxes(page, pdfjs);
+      const raw = t.boxes.map((b) => b.text).join(' ');
+      const chars = raw.replace(/\s/g, '').length;
+      const damage = khmerDamage(normalizeKhmer(raw, settings));
+      const thin = chars < TEXT_THIN;
+      const broken = damage.score > DAMAGE_MAX;
+      if (settings.mode === 'text' || (!thin && !broken)) {
+        boxes = t.boxes; pageWidth = t.width; record.source = 'text layer';
+        if (broken) record.note = 'its text layer looks damaged';
+      } else if (broken) {
+        const found = [
+          damage.dotted && `${damage.dotted} dotted circle${damage.dotted === 1 ? '' : 's'}`,
+          damage.orphans && `${damage.orphans} mark${damage.orphans === 1 ? '' : 's'} without a base`,
+          damage.fragments && `${damage.fragments} broken fragment${damage.fragments === 1 ? '' : 's'}`,
+        ].filter(Boolean).join(', ');
+        record.note = `text layer rejected \u2014 ${found} in ${damage.letters} letters`;
+      }
+    }
+    if (!boxes.length && settings.mode !== 'text') {
+      setStatus(`Page ${num} of ${pdf.numPages} \u2014 rendering at ${settings.dpi} dpi`);
+      const { canvas } = await renderPage(page, settings.dpi);
+      record.thumb = thumbnail(canvas);
+      if (job.cancelled) throw new Error('cancelled');
+      const ocr = await ocrPage(canvas, settings,
+        (s) => setStatus(`Page ${num} of ${pdf.numPages} \u2014 OCR: ${s}`));
+      boxes = ocr.boxes; pageWidth = canvas.width; plain = ocr.text;
+      record.source = 'OCR';
+      record.confidence = ocr.confidence;
+      record.low = boxes
+        .filter((b) => b.conf < settings.confMin)
+        .map((b) => `${normalizeKhmer(b.text, settings)} (${Math.round(b.conf)}%)`);
+      canvas.width = canvas.height = 0;          // release the big canvas
+    }
+    if (!record.thumb && settings.thumbs) {
+      try {
+        const { canvas } = await renderPage(page, 72);
+        record.thumb = thumbnail(canvas);
+        canvas.width = canvas.height = 0;
+      } catch { /* a thumbnail is a convenience, not the job */ }
+    }
+    if (!record.source) record.source = 'empty';
+
+    const lines = groupLines(boxes.map((b) => ({ ...b, text: normalizeKhmer(b.text, settings) })));
+    record.markdown = layoutToMarkdown(lines, pageWidth || 612, settings);
+    record.plain = normalizeKhmer(plain, settings) || lines.map((l) => l.text).join('\n');
+    pages.push(record);
+    page.cleanup();
+  }
+  setBar(1);
+  await pdf.destroy();
+
+  const md = pages.map((p) => {
+    const head = settings.pageHeads ? `## Page ${p.number}\n\n` : '';
+    const body = p.markdown || '_(no text on this page)_';
+    return head + body;
+  }).join(settings.pageHeads ? '\n\n---\n\n' : '\n\n');
+
+  return {
+    markdown: md.trim() + '\n',
+    plain: pages.map((p) => p.plain).join('\n\n').trim() + '\n',
+    pages,
+  };
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 small Markdown preview \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Renders only what this app emits: headings, paragraphs, lists,
+   pipe tables and rules. Text is escaped, so nothing from a PDF
+   can inject markup. */
+function mdToHtml(md) {
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const lines = md.split('\n');
+  const out = [];
+  let i = 0, list = null;
+  const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^\s*$/.test(line)) { closeList(); i++; continue; }
+    if (/^---+$/.test(line.trim())) { closeList(); out.push('<hr>'); i++; continue; }
+    let m = line.match(/^(#{1,6})\s+(.*)$/);
+    if (m) { closeList(); out.push(`<h${m[1].length}>${esc(m[2])}</h${m[1].length}>`); i++; continue; }
+    if (/^\s*\|.*\|\s*$/.test(line) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
+      closeList();
+      const cells = (row) => row.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => esc(c.replace(/\\\|/g, '|').trim()));
+      const head = cells(line);
+      i += 2;
+      const body = [];
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) body.push(cells(lines[i++]));
+      out.push('<table><thead><tr>' + head.map((c) => `<th>${c}</th>`).join('') + '</tr></thead><tbody>'
+        + body.map((r) => '<tr>' + r.map((c) => `<td>${c}</td>`).join('') + '</tr>').join('')
+        + '</tbody></table>');
+      continue;
+    }
+    m = line.match(/^\s*-\s+(.*)$/);
+    if (m) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${esc(m[1])}</li>`); i++; continue; }
+    m = line.match(/^\s*([0-9\u17e0-\u17e9ivxIVX]+)\.\s+(.*)$/);
+    if (m) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${esc(m[2])}</li>`); i++; continue; }
+    closeList();
+    const para = [];
+    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,6}\s|\s*\||---+$|\s*-\s)/.test(lines[i])) para.push(lines[i++]);
+    out.push(`<p>${esc(para.join(' ')).replace(/_\(no text on this page\)_/g, '<em>(no text on this page)</em>')}</p>`);
+  }
+  closeList();
+  return out.join('\n');
+}
+
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 UI \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+let chosen = null;
+
+function settings() {
+  return {
+    mode: el.mode.value,
+    langs: el.langs.value,
+    pages: el.pages.value,
+    dpi: +el.dpi.value,
+    psm: +el.psm.value,
+    confMin: +el.confMin.value,
+    langPath: el.tessdata.value.trim().replace(/\/+$/, '') || 'https://tessdata.projectnaptha.com/4.0.0',
+    tables: el.opt.tables.checked,
+    headings: el.opt.headings.checked,
+    lists: el.opt.lists.checked,
+    join: el.opt.join.checked,
+    pageHeads: el.opt.pageHeads.checked,
+    nfc: el.opt.nfc.checked,
+    reorder: el.opt.reorder.checked,
+    legacy: el.opt.legacy.checked,
+    zwsp: el.opt.zwsp.checked,
+    visual: el.opt.visual.checked,
+    thumbs: true,
+  };
+}
+
+function pick(file) {
+  if (!file) return;
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  if (!isPdf) { setStatus('That is not a PDF.', 'err'); return; }
+  chosen = file;
+  el.dropName.textContent = file.name;
+  el.dropHint.textContent = (file.size / 1048576).toFixed(1) + ' MB';
+  el.run.disabled = false;
+  setStatus('');
+  countPages(file);
+}
+
+async function countPages(file) {
+  try {
+    const pdfjs = await loadPdfjs();
+    const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise;
+    el.pagesHint.textContent = `\u2014 ${pdf.numPages} in the file`;
+    await pdf.destroy();
+  } catch (e) {
+    el.pagesHint.textContent = '';
+    setStatus('Could not open that PDF: ' + e.message, 'err');
+  }
+}
+
+function show(r, s) {
+  result = r;
+  el.md.textContent = r.markdown;
+  el.tx.textContent = r.plain;
+  el.pv.innerHTML = mdToHtml(r.markdown);
+  el.copy.disabled = el.download.disabled = false;
+
+  const ocrPages = r.pages.filter((p) => p.source === 'OCR');
+  const confs = ocrPages.map((p) => p.confidence).filter((c) => typeof c === 'number');
+  const avg = confs.length ? Math.round(confs.reduce((a, b) => a + b, 0) / confs.length) : null;
+  const tables = (r.markdown.match(/^\|[\s:|-]+\|$/gm) || []).length;
+  el.stats.hidden = false;
+  el.stats.innerHTML = [
+    `<span><b>${r.pages.length}</b> page${r.pages.length === 1 ? '' : 's'}</span>`,
+    `<span><b>${r.pages.filter((p) => p.source === 'text layer').length}</b> from the text layer</span>`,
+    `<span><b>${ocrPages.length}</b> by OCR${avg === null ? '' : `, mean confidence <b>${avg}%</b>`}</span>`,
+    `<span><b>${tables}</b> tables</span>`,
+    `<span><b>${[...r.markdown].length.toLocaleString()}</b> characters</span>`,
+  ].join('');
+
+  const notes = r.pages.filter((p) => p.note);
+  if (notes.length) {
+    el.stats.innerHTML += `<span class="flag">${notes.length} page${notes.length === 1 ? '' : 's'} flagged: `
+      + notes.map((p) => `p${p.number} \u2014 ${p.note}`).join('; ') + '</span>';
+  }
+
+  const low = r.pages.flatMap((p) => p.low.map((w) => `p${p.number}: ${w}`));
+  el.lowconf.hidden = low.length === 0;
+  if (low.length) {
+    const head = `<p class="flag">${low.length} word${low.length === 1 ? '' : 's'} read below ${s.confMin}% confidence \u2014 check these against the page image:</p>`;
+    el.lowconf.innerHTML = head + '<ul>' + low.slice(0, 200).map((w) => `<li>${w.replace(/[&<>]/g, '')}</li>`).join('')
+      + '</ul>' + (low.length > 200 ? `<p>\u2026and ${low.length - 200} more.</p>` : '');
+  }
+
+  el.pg.innerHTML = '';
+  for (const p of r.pages) {
+    const card = document.createElement('div');
+    card.className = 'page-card';
+    if (p.thumb) card.appendChild(p.thumb);
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = `<span>Page ${p.number}</span><span>${p.source}${p.confidence ? ' \u00b7 ' + Math.round(p.confidence) + '%' : ''}</span>`;
+    if (p.note) meta.title = p.note;
+    card.appendChild(meta);
+    el.pg.appendChild(card);
+  }
+}
+
+async function run(ev) {
+  ev.preventDefault();
+  if (!chosen || job) return;
+  const s = settings();
+  job = { cancelled: false };
+  el.run.disabled = true; el.cancel.disabled = false;
+  el.copy.disabled = el.download.disabled = true;
+  el.md.textContent = ''; el.pv.innerHTML = ''; el.tx.textContent = '';
+  el.stats.hidden = el.lowconf.hidden = true;
+  setBar(0);
+  setStatus('Opening the file\u2026');
+  const started = performance.now();
+  try {
+    const r = await extract(chosen, s);
+    show(r, s);
+    const secs = ((performance.now() - started) / 1000).toFixed(1);
+    setStatus(`Done \u2014 ${r.pages.length} page${r.pages.length === 1 ? '' : 's'} in ${secs} s.`, 'good');
+  } catch (e) {
+    if (e && e.message === 'cancelled') setStatus('Stopped.', 'flag');
+    else { setStatus('Failed: ' + (e && e.message ? e.message : String(e)), 'err'); console.error(e); }
+    setBar(0);
+  } finally {
+    job = null;
+    el.run.disabled = !chosen; el.cancel.disabled = true;
+  }
+}
+
+/* events */
+el.form.addEventListener('submit', run);
+el.cancel.addEventListener('click', () => { if (job) { job.cancelled = true; setStatus('Stopping\u2026'); } });
+el.file.addEventListener('change', () => pick(el.file.files[0]));
+el.drop.addEventListener('click', () => el.file.click());
+el.drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.file.click(); } });
+['dragenter', 'dragover'].forEach((t) => el.drop.addEventListener(t, (e) => { e.preventDefault(); el.drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((t) => el.drop.addEventListener(t, (e) => { e.preventDefault(); el.drop.classList.remove('over'); }));
+el.drop.addEventListener('drop', (e) => pick(e.dataTransfer && e.dataTransfer.files[0]));
+el.dpi.addEventListener('input', () => { el.dpiOut.textContent = el.dpi.value; });
+el.confMin.addEventListener('input', () => { el.confOut.textContent = el.confMin.value; });
+
+el.copy.addEventListener('click', async () => {
+  const active = document.querySelector('.tabs button[aria-selected=true]').id;
+  const text = active === 'tab-tx' ? result.plain : result.markdown;
+  try { await navigator.clipboard.writeText(text); }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  el.copied.textContent = 'Copied';
+  setTimeout(() => { el.copied.textContent = ''; }, 1600);
+});
+
+el.download.addEventListener('click', () => {
+  const blob = new Blob([result.markdown], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (chosen ? chosen.name.replace(/\.pdf$/i, '') : 'extract') + '.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+});
+
+const panels = { 'tab-md': 'view-md', 'tab-pv': 'view-pv', 'tab-tx': 'view-tx', 'tab-pg': 'view-pg' };
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+  for (const [tab, view] of Object.entries(panels)) {
+    const on = tab === b.id;
+    $(tab).setAttribute('aria-selected', String(on));
+    $(view).hidden = !on;
+  }
+}));
+
+el.theme.addEventListener('click', () => {
+  const now = document.documentElement.getAttribute('data-theme');
+  const dark = now ? now === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  try { localStorage.setItem('ocr-theme', dark ? 'light' : 'dark'); } catch { /* private mode */ }
+});
+try {
+  const saved = localStorage.getItem('ocr-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch { /* private mode */ }
+
+/* a self-check of the Khmer repair, visible in the console */
+(function selfTest() {
+  const cases = [
+    ['\u1781\u17d2\u1789\u17bb\u17c6', '\u1781\u17d2\u1789\u17bb\u17c6'],          // khnyom, already in order
+    ['\u1781\u17c6\u17d2\u1789\u17bb', '\u1781\u17d2\u1789\u17bb\u17c6'],          // sign before coeng and vowel
+    ['\u179f\u17b6\u17d2\u179b\u17b6', '\u179f\u17d2\u179b\u17b6'],                // vowel before coeng; the repeat is dropped
+    ['\u17a4', '\u17a2\u17b6'],
+    ['\u17c1\u179b\u17b8', '\u179b\u17be'],                                                     // deprecated QAA
+  ];
+  const opts = { nfc: true, reorder: true, legacy: true, zwsp: false, visual: true };
+  const bad = cases.filter(([input, want]) => normalizeKhmer(input, opts) !== want);
+  if (bad.length) console.warn('Khmer normalization self-test failed for', bad);
+  else console.info(`Khmer normalization self-test: ${cases.length}/${cases.length}`);
+})();
+</script>
+</body>
+</html>
