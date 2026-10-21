@@ -414,6 +414,47 @@ function normalizeKhmer(s, o) {
   return t;
 }
 
+/* Limon, ABC and the other pre-Unicode Khmer fonts store Latin byte values and
+   let the font draw the Khmer glyphs. Such a text layer extracts as nonsense
+   ("rnfij~~~S~5.Q~ffi$G"), so the page has to be read by OCR instead. Two signals
+   find it: a Khmer-named font whose text holds no Khmer, and the shape of the text
+   itself - symbols and digits inside words, mid-word capitals, words with no vowel. */
+const LEGACY_FAMILY = /limon|khek|^abc|[^a-z]abc|kh[\s_-]?(?:bright|system|unicode1)/i;
+const KHMER_FAMILY = /khmer|battambang|moul|siemreap|bokor|content|dangrek|freehand|hanuman|kdam|koulen|metal|muktinath|nokora|odor|taprom|fasthand|angkor/i;
+
+function latinGarble(text) {
+  const letters = (text.match(/[A-Za-z]/g) || []).length;
+  const tokens = text.split(/\s+/).filter((t) => /[A-Za-z]/.test(t));
+  if (letters < 40 || tokens.length < 8) return 0;
+  const odd = (t) => /[^A-Za-z0-9'".,;:()\-\/%&]/.test(t);
+  const vowelless = (t) => {
+    const only = t.replace(/[^A-Za-z]/g, '');
+    return only.length >= 4 && !/[aeiouyAEIOUY]/.test(only);
+  };
+  const digitInWord = (t) => t.length >= 3 && /[0-9]/.test(t);
+  const midCaps = (t) => /[a-z][A-Z]/.test(t);
+  const bad = tokens.filter((t) => odd(t) || vowelless(t) || digitInWord(t) || midCaps(t)).length;
+  return bad / tokens.length;
+}
+
+/* Why a text layer cannot be read as Khmer. Three cases, all answered by OCR:
+   a pre-Unicode font (Limon, ABC) storing Latin byte values; a Unicode Khmer
+   font whose shaped glyphs map back to nothing; and text that is simply
+   garbled. Returns a sentence for the page note, or null when the layer is
+   sound. */
+function unreadableTextLayer(text, fonts) {
+  if (/[\u1780-\u17ff]/.test(text)) return null;      // real Khmer Unicode: the layer is readable
+  if (text.replace(/\s/g, '').length < 40) return null;
+  const list = fonts || [];
+  const legacy = list.find((f) => LEGACY_FAMILY.test(f));
+  if (legacy) return `its text layer uses ${legacy}, a pre-Unicode Khmer font that stores Latin byte values`;
+  const khmerFont = list.find((f) => KHMER_FAMILY.test(f));
+  if (khmerFont) return `the page is set in ${khmerFont} but its text layer holds no Khmer Unicode`;
+  const garble = latinGarble(text);
+  if (garble >= 0.35) return `its text layer reads as legacy-font bytes (${Math.round(garble * 100)}% of words malformed)`;
+  return null;
+}
+
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 geometry helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const median = (xs) => {
   if (!xs.length) return 0;
@@ -648,6 +689,7 @@ function loadTesseract() {
 async function textLayerBoxes(page, pdfjs) {
   const viewport = page.getViewport({ scale: 1 });
   const content = await page.getTextContent({ includeMarkedContent: false });
+  const fonts = Object.values(content.styles || {}).map((st) => st.fontFamily || '').filter(Boolean);
   const boxes = [];
   for (const item of content.items) {
     if (!item.str || item.str.trim() === '') continue;
@@ -659,7 +701,7 @@ async function textLayerBoxes(page, pdfjs) {
     const y1 = tm[5];                        // the baseline, in device space
     boxes.push({ text: item.str, x0, x1: x0 + w, y0: y1 - h, y1, conf: 100 });
   }
-  return { boxes, width: viewport.width, height: viewport.height };
+  return { boxes, fonts, width: viewport.width, height: viewport.height };
 }
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 page rendering \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -800,11 +842,15 @@ async function extract(file, settings) {
       const raw = t.boxes.map((b) => b.text).join(' ');
       const chars = raw.replace(/\s/g, '').length;
       const damage = khmerDamage(normalizeKhmer(raw, settings));
+      const legacy = unreadableTextLayer(raw, t.fonts);
       const thin = chars < TEXT_THIN;
       const broken = damage.score > DAMAGE_MAX;
-      if (settings.mode === 'text' || (!thin && !broken)) {
+      if (settings.mode === 'text' || (!thin && !broken && !legacy)) {
         boxes = t.boxes; pageWidth = t.width; record.source = 'text layer';
-        if (broken) record.note = 'its text layer looks damaged';
+        if (legacy) record.note = legacy + ' \u2014 switch to OCR to read this page';
+        else if (broken) record.note = 'its text layer looks damaged';
+      } else if (legacy) {
+        record.note = `read by OCR: ${legacy}`;
       } else if (broken) {
         const found = [
           damage.dotted && `${damage.dotted} dotted circle${damage.dotted === 1 ? '' : 's'}`,
