@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Khmer PDF OCR</title>
-<meta name="description" content="Extract Khmer and English text from PDFs in the browser: embedded text layer or Tesseract OCR, with tables and layout kept as Markdown.">
+<meta name="description" content="Extract Khmer and English text from PDFs in the browser, with the page's layout and formatting kept, as a Word file or Markdown.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&family=Noto+Sans+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&family=Noto+Sans+Mono:wght@400&family=Siemreap&family=Moul&display=swap">
 <style>
 :root{
   --bg:#fbfaf8; --panel:#ffffff; --ink:#1c1b19; --ink-soft:#5d5a54; --line:#e3dfd7;
@@ -94,6 +94,19 @@ pre.code:lang(km),.kh,.khmer-text{font-family:var(--khmer)}
 .preview th,.preview td{border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top}
 .preview th{background:color-mix(in srgb, var(--accent) 8%, var(--panel))}
 .preview hr{border:0; border-top:1px solid var(--line); margin:1.6em 0}
+.preview .sheet{background:#fff; color:#111; border:1px solid var(--line); border-radius:6px; padding:28px 32px; margin:0 0 18px;
+  font-family:"Siemreap","Khmer OS Siemreap",var(--khmer); line-height:1.9; max-width:760px}
+.preview .sheet p,.preview .sheet h2,.preview .sheet h3{margin:0; font-family:inherit; font-weight:400; line-height:1.9}
+.preview .sheet b{font-weight:700}
+.preview .sheet .display{font-family:"Moul","Khmer OS Muol Light",var(--khmer); font-weight:400}
+.preview .sheet .marker{display:inline-block; text-indent:0}
+.preview .sheet .tabrow{display:flex; justify-content:space-between; gap:12px}
+.preview .sheet .tabcol{display:inline-block}
+.preview .sheet table{width:100%; margin:6px 0; font-family:inherit; border-collapse:collapse}
+.preview .sheet table.bare td{border:0; padding:0 8px 0 0}
+.preview .sheet table.ruled td{border:1px solid #555; padding:2px 6px}
+.preview .page-tag{font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 6px}
+.preview .empty{color:var(--ink-soft); font-style:italic}
 .pages{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); padding:16px}
 .page-card{border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--bg)}
 .page-card canvas{display:block; width:100%; height:auto}
@@ -117,7 +130,7 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
 <header class="top">
   <div>
     <h1>Khmer PDF OCR <span class="kh">· ស្រង់អត្ថបទពី PDF</span></h1>
-    <p class="sub">Reads Khmer and English PDFs in your browser. It uses the file's own text layer where there is a sound one, and Tesseract OCR where the text layer is missing or comes back broken — as it does in many Khmer PDFs, whose shaped glyphs map back to nothing. A page set in a pre-Unicode font &mdash; Limon, ABC, Khek and the rest &mdash; is converted byte for byte into Unicode instead, which is exact where OCR only guesses. The result is written as Markdown, with tables and headings kept. Nothing leaves your machine except the one-time download of the OCR engine and language data.</p>
+    <p class="sub">Reads Khmer and English PDFs in your browser. It uses the file's own text layer where there is a sound one, and Tesseract OCR where the text layer is missing or comes back broken — as it does in many Khmer PDFs, whose shaped glyphs map back to nothing. A page set in a pre-Unicode font &mdash; Limon, ABC, Khek and the rest &mdash; is converted byte for byte into Unicode instead, which is exact where OCR only guesses. The result keeps the page's form &mdash; alignment, indents, type size, bold, underline, Muol headings, lists and tables &mdash; and downloads as a Word file or as Markdown. Nothing leaves your machine except the one-time download of the OCR engine and language data.</p>
   </div>
   <button class="theme-toggle small" id="theme" type="button" aria-label="Switch colour theme">◐ Theme</button>
 </header>
@@ -191,6 +204,29 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
     </fieldset>
 
     <fieldset class="field">
+      <legend>Word file</legend>
+      <label for="bodyFont" class="sr">Body font</label>
+      <div class="row" style="gap:8px">
+        <select id="bodyFont" title="Font for body text in the Word file">
+          <option selected>Khmer OS Siemreap</option>
+          <option>Khmer OS Battambang</option>
+          <option>Khmer OS Content</option>
+          <option>Khmer OS System</option>
+          <option>Siemreap</option>
+          <option>Battambang</option>
+          <option>Noto Sans Khmer</option>
+        </select>
+        <select id="displayFont" title="Font for display lines such as the national motto">
+          <option selected>Khmer OS Muol Light</option>
+          <option>Khmer OS Muol</option>
+          <option>Moul</option>
+          <option value="">Same as body, bold</option>
+        </select>
+      </div>
+      <span class="check"><span class="hint">Body font, then the display face used where the page is set in Muol. Both must be installed where the file is opened.</span></span>
+    </fieldset>
+
+    <fieldset class="field">
       <legend>Khmer text</legend>
       <label class="check"><input type="checkbox" id="optNFC" checked>
         <span>Unicode NFC<span class="hint">Normalization form C over the whole output.</span></span></label>
@@ -215,14 +251,22 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
       <summary>Advanced</summary>
       <div class="field">
         <label for="tessdata">Tesseract language data</label>
-        <input type="text" id="tessdata" value="https://tessdata.projectnaptha.com/4.0.0">
-        <span class="hint" style="display:block;color:var(--ink-soft);font-size:.8rem;margin-top:4px">If that host is blocked on your network, one language at a time also works from <code>https://cdn.jsdelivr.net/npm/@tesseract.js-data/khm@1.0.0/4.0.0</code>.</span>
+        <input type="text" id="tessdata" value="" placeholder="default: best models from cdn.jsdelivr.net">
+        <span class="hint" style="display:block;color:var(--ink-soft);font-size:.8rem;margin-top:4px">Leave empty for Tesseract.js's own <code>4.0.0_best_int</code> models. A folder URL here must hold every language you choose.</span>
+      </div>
+      <div class="field">
+        <label for="cleanup">Scan clean-up</label>
+        <select id="cleanup">
+          <option value="auto" selected>Auto &mdash; adaptive threshold on scanned pages</option>
+          <option value="off">Off</option>
+          <option value="always">Always</option>
+        </select>
       </div>
       <div class="field">
         <label for="psm">Page segmentation</label>
         <select id="psm">
-          <option value="3" selected>Automatic (3)</option>
-          <option value="4">Columns of text (4)</option>
+          <option value="4" selected>One column, mixed sizes (4) &mdash; best on letters and notices</option>
+          <option value="3">Automatic (3)</option>
           <option value="6">One uniform block (6)</option>
           <option value="11">Sparse text (11)</option>
           <option value="12">Sparse text with layout (12)</option>
@@ -245,6 +289,7 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
     </div>
     <div class="toolbar">
       <button class="small" id="copy" type="button" disabled>Copy</button>
+      <button class="small primary" id="docx" type="button" disabled>Download .docx</button>
       <button class="small" id="download" type="button" disabled>Download .md</button>
       <span class="spacer"></span>
       <span id="copied" class="good" style="font-size:.85rem"></span>
@@ -284,7 +329,8 @@ const $ = (id) => document.getElementById(id);
 const el = {
   file:$('file'), drop:$('drop'), dropName:$('dropName'), dropHint:$('dropHint'),
   mode:$('mode'), langs:$('langs'), legacy:$('legacy'), pages:$('pages'), pagesHint:$('pagesHint'),
-  dpi:$('dpi'), dpiOut:$('dpiOut'), tessdata:$('tessdata'), psm:$('psm'),
+  dpi:$('dpi'), dpiOut:$('dpiOut'), tessdata:$('tessdata'), psm:$('psm'), cleanup:$('cleanup'),
+  bodyFont:$('bodyFont'), displayFont:$('displayFont'), docx:$('docx'),
   confMin:$('confMin'), confOut:$('confOut'),
   run:$('run'), cancel:$('cancel'), status:$('status'), bar:$('bar'),
   md:$('md'), pv:$('pv'), tx:$('tx'), pg:$('pg'), stats:$('stats'), lowconf:$('lowconf'),
@@ -491,6 +537,29 @@ function unreadableTextLayer(text, fonts) {
   return null;
 }
 
+/* OCR confusions safe to correct without a dictionary. The sign \u17d6 is a
+   colon and never touches a following letter, so glued to one it is a misread
+   reahmuk \u17c7. A Latin 0 or o beside a Khmer digit is a Khmer zero \u17e0;
+   runs of Latin digits such as VB/0655 are left alone. */
+function fixOcrConfusions(s) {
+  return s
+    .replace(/\u17d6(?=[\u1780-\u17b3])/g, '\u17c7')
+    .replace(/[0oO](?=[0oO]*[\u17e0-\u17e9])|(?<=[\u17e0-\u17e9][0oO]*)[0oO]/g, '\u17e0');
+}
+
+/* Logos, stamps, signatures and scanner watermarks come back from OCR as short
+   runs of Latin junk. On a page that is mostly Khmer, a line with no Khmer in
+   it and little confidence behind it is noise. */
+const WATERMARK = /^\s*scanned\s+(by|with)\s+camscanner\s*$/i;
+function isOcrJunk(line, khmerPage) {
+  if (WATERMARK.test(line.text)) return true;
+  // a stray Khmer digit does not make a line Khmer; three Khmer letters do
+  const khmerLetters = (line.text.match(/[\u1780-\u17b3]/g) || []).length;
+  if (!khmerPage || khmerLetters >= 3) return false;
+  const conf = line.items.reduce((a, it) => a + (it.conf ?? 100), 0) / line.items.length;
+  return conf < 70;
+}
+
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 geometry helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 const median = (xs) => {
   if (!xs.length) return 0;
@@ -560,14 +629,17 @@ function groupLines(items, transform) {
    centres across the run, and keep the clusters that most of the lines share. */
 function findTables(lines, pageWidth) {
   const bodyH = median(lines.map((l) => l.height)) || 10;
-  const gapMin = Math.max(pageWidth * 0.022, bodyH * 1.1);
+  // Wide enough that the stretched spaces of justified text never qualify.
+  const gapMin = Math.max(pageWidth * 0.04, bodyH * 1.5);
   const tol = pageWidth * 0.02;
 
   const gapsOf = (line) => {
     const g = [];
     for (let i = 1; i < line.items.length; i++) {
       const from = line.items[i - 1].x1, to = line.items[i].x0;
-      if (to - from >= gapMin) g.push((from + to) / 2);
+      // A column is where its text starts; the gap before it varies with the
+      // ragged ends of the column to its left.
+      if (to - from >= gapMin) g.push(to);
     }
     return g;
   };
@@ -582,7 +654,7 @@ function findTables(lines, pageWidth) {
            && lines[j + 1].y0 - lines[j].y1 < bodyH * 1.9) j++;
     const run = [];
     for (let k = i; k <= j; k++) run.push(gaps[k]);
-    // cluster gap centres shared by the run
+    // cluster the column starts the run shares
     const all = run.flat().sort((a, b) => a - b);
     const clusters = [];
     for (const x of all) {
@@ -596,7 +668,7 @@ function findTables(lines, pageWidth) {
         const lo = c[0] - tol, hi = c.at(-1) + tol;
         return run.filter((g) => g.some((x) => x >= lo && x <= hi)).length >= Math.min(need, run.length);
       })
-      .map((c) => c.reduce((a, b) => a + b, 0) / c.length);
+      .map((c) => Math.min(...c) - 1);
     if (run.length >= 2 && bounds.length >= 1) blocks.push({ table: true, from: i, to: j, bounds });
     else for (let k = i; k <= j; k++) blocks.push({ table: false, from: k, to: k });
     i = j + 1;
@@ -604,97 +676,443 @@ function findTables(lines, pageWidth) {
   return blocks;
 }
 
-const escapeCell = (s) => s.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
+const BULLET = /^\s*([\u2022\u00b7\u2023\u25aa\u25cf\u2043\u2219*\u2013\u2014-]|o\s)\s*(?:[=~_\u2013\u2014-]+\s+)?/;
+const NUMBER = /^\s*\(?([0-9]{1,3}|[\u17e0-\u17e9]{1,3}|[ivxIVX]{1,4})\s*[.)\u17d4\u17d5:]\s+/;
 
-function tableToMarkdown(lines, bounds, transform) {
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 page model \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   One page becomes a list of blocks, each carrying what the printed page
+   showed: alignment, indents, type size, bold, display type (Muol) and
+   underline, down to the run. Markdown, the preview and the Word file are all
+   drawn from this one model. Geometry: wPx and hPx are the page in the units
+   the boxes use, pxPerPt converts them to points. */
+
+const SIZE_FROM_BOX = 1.4;        // a Khmer word box is about 1.4 times the type size
+const SIZE_FROM_DISPLAY_BOX = 1.55; // and a Muol one taller still
+const BOLD_STROKE = 1.2;          // stroke this much above the page's body text reads as bold
+const DISPLAY_STROKE = 1.47;      // and this much as a display face such as Muol
+
+const percentile = (xs, p) => {
+  if (!xs.length) return 0;
+  const a = [...xs].sort((x, y) => x - y);
+  return a[Math.min(a.length - 1, Math.max(0, Math.round((a.length - 1) * p)))];
+};
+const letterCount = (s) => (s.match(/[\p{L}\p{N}]/gu) || []).length;
+
+/** Mark each item bold, display or underlined, from ink measures or font names. */
+function styleItems(lines) {
+  const items = lines.flatMap((l) => l.items);
+  const strokes = items.filter((it) => it.stroke > 0 && letterCount(it.text) >= 2).map((it) => it.stroke);
+  const body = median(strokes);
+  for (const it of items) {
+    if (it.fontStyle) { it.bold = it.fontStyle.bold; it.display = it.fontStyle.display; continue; }
+    const r = body && it.stroke ? it.stroke / body : 1;
+    it.display = r >= DISPLAY_STROKE && letterCount(it.text) >= 2;
+    it.bold = !it.display && r >= BOLD_STROKE && letterCount(it.text) >= 2;
+  }
+  for (const l of lines) {
+    const n = (f) => l.items.filter(f).reduce((a, it) => a + letterCount(it.text), 0);
+    const all = n(() => true) || 1;
+    l.display = n((it) => it.display) / all > 0.5;
+    l.bold = n((it) => it.bold) / all > 0.5;
+  }
+}
+
+/** The runs of one line: text joined as joinLine does, split where the style changes. */
+function lineRuns(items, transform) {
+  const widths = items.map((it) => (it.x1 - it.x0) / Math.max(1, [...it.text].length));
+  const charW = median(widths.filter((w) => w > 0)) || 4;
+  const h = median(items.map((it) => it.y1 - it.y0)) || 10;
+  const minGap = Math.min(charW * 0.5, h * 0.28);
+  const runs = [];
+  let prevText = '';
+  items.forEach((it, i) => {
+    let text = it.text;
+    if (i > 0) {
+      const gap = it.x0 - items[i - 1].x1;
+      const tight = KH_MARK_START.test(text) || items[i - 1].text.endsWith('\u17d2');
+      const spaced = /\s$/.test(prevText) || /^\s/.test(text);
+      if (!tight && !spaced && gap > minGap) text = ' ' + text;
+    }
+    prevText = it.text;
+    const style = { bold: !!it.bold, display: !!it.display, under: !!it.under };
+    const last = runs[runs.length - 1];
+    if (last && last.bold === style.bold && last.display === style.display && last.under === style.under) last.text += text;
+    else runs.push({ text, ...style });
+  });
+  for (const r of runs) {
+    r.text = r.text.replace(/[ \t]{2,}/g, ' ');
+    if (transform) r.text = transform(r.text);
+  }
+  // a space belongs to no style: move it out of an underlined or bold run's edge
+  for (let i = 1; i < runs.length; i++) {
+    const m = runs[i].text.match(/^\s+/);
+    if (m && (runs[i].under || runs[i].bold)) { runs[i - 1].text += m[0]; runs[i].text = runs[i].text.slice(m[0].length); }
+  }
+  if (runs.length) { runs[0].text = runs[0].text.replace(/^\s+/, ''); runs[runs.length - 1].text = runs[runs.length - 1].text.replace(/\s+$/, ''); }
+  return runs.filter((r) => r.text !== '');
+}
+
+const runsText = (runs) => runs.map((r) => r.text).join('');
+
+/** Append one line's runs to a paragraph's, joining Khmer to Khmer without a space. */
+function appendRuns(target, runs) {
+  if (!target.length) { target.push(...runs.map((r) => ({ ...r }))); return; }
+  const last = target[target.length - 1];
+  const head = runs[0];
+  if (!head) return;
+  let glue = ' ';
+  if (/-$/.test(last.text) && /^[a-zA-Z]/.test(head.text)) { last.text = last.text.slice(0, -1); glue = ''; }
+  else if (KH_END.test(last.text) && KH_START.test(head.text)) glue = '';
+  const first = { ...head, text: glue + head.text };
+  if (last.bold === first.bold && last.display === first.display && last.under === first.under) last.text += first.text;
+  else { if (glue && (first.under || first.bold)) { last.text += glue; first.text = head.text; } target.push(first); }
+  for (const r of runs.slice(1)) target.push({ ...r });
+}
+
+function layoutBlocks(lines, geom, opts) {
+  if (!lines.length) return [];
+  const pxPerPt = geom.pxPerPt || 1;
+  styleItems(lines);
+  for (const l of lines) {
+    l.runs = lineRuns(l.items, opts.transform);
+    l.text = runsText(l.runs);
+  }
+  lines = lines.filter((l) => l.text !== '');
+  if (!lines.length) return [];
+
+  // the text block: margins from the lines that carry real text
+  const long = lines.filter((l) => [...l.text].length >= 20);
+  const ref = long.length >= 3 ? long : lines;
+  const left = percentile(ref.map((l) => l.x0), 0.1);
+  const right = percentile(ref.map((l) => l.x1), 0.9);
+  const textW = Math.max(1, right - left);
+  const mid = (left + right) / 2;
+
+  // type sizes: exact from a text layer, estimated and snapped to the body size from OCR
+  const rawSize = (l) => {
+    const h = median(l.items.map((it) => it.y1 - it.y0)) / pxPerPt;
+    return geom.ocr ? h / (l.display ? SIZE_FROM_DISPLAY_BOX : SIZE_FROM_BOX) : h;
+  };
+  const bodySize = (() => {
+    const s = median((long.length ? long : lines).map(rawSize)) || 11;
+    return Math.min(16, Math.max(8, Math.round(s * 2) / 2));
+  })();
+  for (const l of lines) {
+    const raw = rawSize(l);
+    const ratio = raw / bodySize;
+    if (geom.ocr) l.size = ratio >= 1.3 && [...l.text].length <= 80 ? Math.min(28, Math.round(raw)) : bodySize;
+    else l.size = Math.abs(ratio - 1) < 0.08 ? bodySize : Math.round(raw * 2) / 2;
+    const c = (l.x0 + l.x1) / 2, w = l.x1 - l.x0;
+    if (Math.abs(c - mid) < textW * 0.05 && l.x0 - left > textW * 0.06 && right - l.x1 > textW * 0.06 && w < textW * 0.75) l.align = 'center';
+    else if (right - l.x1 < textW * 0.04 && l.x0 - left > textW * 0.35 && w < textW * 0.6) l.align = 'right';
+    else l.align = 'left';
+  }
+
+  // Lines that share a centre away from the page's middle are a block centred
+  // over part of the page, like the national motto over the right half.
+  lines.forEach((l, i) => {
+    const c = (l.x0 + l.x1) / 2;
+    for (const o of [lines[i - 1], lines[i + 1]]) {
+      if (!o || l.x1 - l.x0 > textW * 0.6 || o.x1 - o.x0 > textW * 0.6) continue;
+      const oc = (o.x0 + o.x1) / 2;
+      // shared centre, different edges: neither a left-aligned nor a right-aligned stack
+      if (Math.abs(c - oc) < textW * 0.015 && Math.abs(l.x0 - o.x0) > textW * 0.01 && Math.abs(l.x1 - o.x1) > textW * 0.01
+          && Math.abs(c - mid) > textW * 0.05) {
+        l.align = o.align = 'center';
+        l.centerAt = o.centerAt = (c + oc) / 2;
+      }
+    }
+  });
+  const textWpt = (right - left) / pxPerPt;
+
+  const pitch = median(lines.slice(1).map((l, i) => l.y0 - lines[i].y0).filter((g) => g > 0)) || bodySize * pxPerPt * 2;
+  const blocksIdx = opts.tables ? findTables(lines, geom.wPx) : lines.map((_, i) => ({ table: false, from: i, to: i }));
+  const pt = (px) => Math.round((px / pxPerPt) * 2) / 2;
+  const blocks = [];
+  let cur = null;
+  const close = () => { if (cur) { blocks.push(cur); cur = null; } };
+  const gapBefore = (l, prev) => (prev ? Math.max(0, pt(l.y0 - prev.y0 - pitch)) : 0);
+
+  for (const b of blocksIdx) {
+    if (b.table) {
+      const rows = tableRows(lines.slice(b.from, b.to + 1), b.bounds, opts.transform);
+      if (rows) {
+        close();
+        const tl = lines[b.from], edges = [left, ...b.bounds, right];
+        const widths = edges.slice(1).map((x, i) => Math.max(1, x - edges[i]));
+        blocks.push({ type: 'table', rows, widths: widths.map((w) => pt(w)), size: bodySize,
+          before: gapBefore(tl, lines[b.from - 1]), ruled: geom.ruled ? geom.ruled(tl.y0, lines[b.to].y1, left, right) : !geom.ocr });
+        continue;
+      }
+      for (let k = b.from; k <= b.to; k++) addLine(k);
+      continue;
+    }
+    addLine(b.from);
+  }
+  close();
+  // the paper and the margins the text sat in, for the Word file
+  blocks.frame = {
+    wPt: geom.wPx / pxPerPt, hPt: geom.hPx / pxPerPt,
+    left: left / pxPerPt, right: (geom.wPx - right) / pxPerPt,
+    top: Math.max(0, Math.min(...lines.map((l) => l.y0)) / pxPerPt - 4),
+    bottom: Math.max(0, (geom.hPx - Math.max(...lines.map((l) => l.y1))) / pxPerPt - 4),
+  };
+  return blocks;
+
+  function addLine(k) {
+    const l = lines[k], prev = lines[k - 1];
+    const t = l.text;
+    const bullet = opts.lists && BULLET.test(t) ? t.match(BULLET) : null;
+    const number = !bullet && opts.lists ? t.match(NUMBER) : null;
+    const big = l.size >= bodySize * 1.25;
+    const heading = opts.headings && [...t].length <= 120 && (big || ((l.display || l.bold) && l.align === 'center'));
+    const wrappedFromPrev = prev && cur && cur.type !== 'h' && cur.align === 'left' && right - prev.x1 < textW * 0.12
+      && l.y0 - prev.y1 < (pitch - (prev.y1 - prev.y0)) * 1.8 + 2 && l.align === 'left' && !bullet && !number && !heading;
+
+    if (wrappedFromPrev && opts.join && !cur.standalone && (cur.type === 'p' || cur.type === 'li')) {
+      const contIndent = pt(l.x0 - left);
+      if (cur.type === 'p' && cur.lines === 1) cur.contIndent = contIndent;
+      appendRuns(cur.runs, l.runs);
+      cur.lines++;
+      cur.justify = true;
+      return;
+    }
+    close();
+    const base = { align: l.align, size: l.size, before: gapBefore(l, prev), lines: 1, textW: textWpt,
+      ...(l.centerAt !== undefined ? { centerAt: pt(l.centerAt - left) } : {}) };
+    if (heading) {
+      const level = l.size >= bodySize * 1.5 ? 1 : 2;
+      cur = { type: 'h', level, runs: l.runs.map((r) => ({ ...r })), ...base };
+      close();
+      return;
+    }
+    if (bullet || number) {
+      const markerIndent = pt(l.x0 - left);
+      const after = l.items[1] ? pt(l.items[1].x0 - left) : markerIndent + 18;
+      const marker = bullet ? bullet[1].trim() || '-' : number[0].trim();
+      const runs = l.runs.map((r) => ({ ...r }));
+      if (runs.length) runs[0].text = runs[0].text.slice(bullet ? bullet[0].length : number[0].length);
+      cur = { type: 'li', ordered: !!number, marker, markerIndent, textIndent: Math.max(after, markerIndent + 9),
+        runs: runs.filter((r) => r.text !== ''), ...base, align: 'left' };
+      return;
+    }
+    cur = { type: 'p', runs: l.runs.map((r) => ({ ...r })), indent: l.align === 'left' ? pt(l.x0 - left) : 0, ...base };
+    if (l.align === 'left') {
+      // the widest gap inside the line: a tab stop in the printed original
+      let at = -1, widest = 0;
+      for (let i = 1; i < l.items.length; i++) {
+        const g = l.items[i].x0 - l.items[i - 1].x1;
+        if (g > widest) { widest = g; at = i; }
+      }
+      if (at > 0 && widest >= textW * 0.12) {
+        const leftRuns = lineRuns(l.items.slice(0, at), opts.transform);
+        const rightRuns = lineRuns(l.items.slice(at), opts.transform);
+        const flush = right - l.x1 < textW * 0.06;
+        cur.runs = [...leftRuns, { text: '\t', bold: false, display: false, under: false }, ...rightRuns];
+        cur.tab = flush ? { type: 'right', pos: textWpt } : { type: 'left', pos: pt(l.items[at].x0 - left) };
+        cur.standalone = true;
+      }
+    }
+  }
+}
+
+/** The cells of a table, as runs, from line items split at the column bounds. */
+function tableRows(lines, bounds, transform) {
   const edges = [-Infinity, ...bounds, Infinity];
   const cols = edges.length - 1;
   const rows = lines.map((line) => {
     const cells = Array.from({ length: cols }, () => []);
     for (const it of line.items) {
-      const mid = (it.x0 + it.x1) / 2;
+      const m = (it.x0 + it.x1) / 2;
       let c = 0;
-      while (c < cols - 1 && mid >= edges[c + 1]) c++;
+      while (c < cols - 1 && m >= edges[c + 1]) c++;
       cells[c].push(it);
     }
-    return cells.map((group) => (group.length ? escapeCell(joinLine(group, transform)) : ''));
-  }).filter((r) => r.some((c) => c !== ''));
-  if (rows.length < 2) return null;
-  const head = rows[0];
-  const out = [
-    '| ' + head.join(' | ') + ' |',
-    '| ' + head.map(() => '---').join(' | ') + ' |',
-    ...rows.slice(1).map((r) => '| ' + r.join(' | ') + ' |'),
-  ];
-  return out.join('\n');
+    return cells.map((g) => (g.length ? lineRuns(g, transform) : []));
+  }).filter((r) => r.some((c) => c.length));
+  return rows.length >= 2 ? rows : null;
 }
 
-/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 line classification \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-const BULLET = /^\s*([\u2022\u00b7\u2023\u25aa\u25cf\u2043\u2219*\u2013\u2014-]|o\s)\s*/;
-const NUMBER = /^\s*\(?([0-9]{1,3}|[\u17e0-\u17e9]{1,3}|[ivxIVX]{1,4})\s*[.)\u17d4\u17d5:]\s+/;
-
-function classify(line, bodyH, opts) {
-  const t = line.text;
-  if (opts.headings) {
-    const ratio = line.height / bodyH;
-    const short = [...t].length <= 120;
-    if (short && ratio >= 1.55) return { kind: 'h', level: 1 };
-    if (short && ratio >= 1.28) return { kind: 'h', level: 2 };
-    if (short && ratio >= 1.12) return { kind: 'h', level: 3 };
-  }
-  if (opts.lists) {
-    if (BULLET.test(t)) return { kind: 'ul' };
-    if (NUMBER.test(t)) return { kind: 'ol' };
-  }
-  return { kind: 'p' };
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Markdown from the model \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+function runsToMarkdown(runs) {
+  return runs.map((r) => {
+    const t = r.text.replace(/([*_`\\])/g, '\\$1').replace(/\t/g, '    ');
+    if (!(r.bold || r.display) || !t.trim()) return t;
+    const lead = t.match(/^\s*/)[0], tail = t.match(/\s*$/)[0];
+    return `${lead}**${t.trim()}**${tail}`;
+  }).join('').replace(/\*\*\*\*/g, '');
 }
 
-/** Turn one page's line boxes into Markdown. */
-function layoutToMarkdown(lines, pageWidth, opts) {
-  if (!lines.length) return '';
-  const bodyH = median(lines.map((l) => l.height)) || 10;
-  const lineGap = median(lines.slice(1).map((l, i) => l.y0 - lines[i].y1).filter((g) => g > 0)) || bodyH * 0.4;
-  const blocks = opts.tables ? findTables(lines, pageWidth) : lines.map((_, i) => ({ table: false, from: i, to: i }));
-  const right = Math.max(...lines.map((l) => l.x1));
-  const chunks = [];
-  let para = [];
-  const flush = () => { if (para.length) { chunks.push(para.join(opts.join ? '' : '\n')); para = []; } };
-
+function blocksToMarkdown(blocks) {
+  const out = [];
   for (const b of blocks) {
-    if (b.table) {
-      const md = tableToMarkdown(lines.slice(b.from, b.to + 1), b.bounds, opts.transform);
-      if (md) { flush(); chunks.push(md); continue; }
-      // not convincing as a table after all: fall through as text
-      for (let k = b.from; k <= b.to; k++) addText(lines[k], k);
-      continue;
+    if (b.type === 'h') out.push('#'.repeat(b.level) + ' ' + runsText(b.runs));
+    else if (b.type === 'li') out.push((b.ordered ? b.marker.replace(/[)\u17d4\u17d5:]$/, '.') : '-') + ' ' + runsToMarkdown(b.runs));
+    else if (b.type === 'p') out.push(runsToMarkdown(b.runs));
+    else if (b.type === 'table') {
+      const cell = (c) => runsText(c).replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
+      const head = b.rows[0].map(cell);
+      out.push(['| ' + head.join(' | ') + ' |', '| ' + head.map(() => '---').join(' | ') + ' |',
+        ...b.rows.slice(1).map((r) => '| ' + r.map(cell).join(' | ') + ' |')].join('\n'));
     }
-    addText(lines[b.from], b.from);
   }
-  flush();
-  return chunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+  // consecutive list items stay together; everything else is a paragraph of its own
+  let md = '';
+  out.forEach((chunk, i) => {
+    const tight = i > 0 && blocks[i].type === 'li' && blocks[i - 1].type === 'li';
+    md += (i === 0 ? '' : tight ? '\n' : '\n\n') + chunk;
+  });
+  return md.trim();
+}
 
-  function addText(line, index) {
-    const cls = classify(line, bodyH, opts);
-    const prev = lines[index - 1];
-    const gapBefore = prev ? line.y0 - prev.y1 : 0;
-    const newBlock = !prev || gapBefore > lineGap * 1.8 || cls.kind !== 'p'
-      || (prev && prev.x1 < right - bodyH * 3 && /[.\u17d4\u17d5:!?]$/.test(prev.text.trim()));
-    if (newBlock) flush();
+/** Kept for callers that still want one call: lines in, Markdown out. */
+function layoutToMarkdown(lines, geomOrWidth, opts) {
+  const geom = typeof geomOrWidth === 'number' ? { wPx: geomOrWidth, pxPerPt: 1 } : geomOrWidth;
+  return blocksToMarkdown(layoutBlocks(lines, geom, opts));
+}
 
-    if (cls.kind === 'h') { chunks.push('#'.repeat(cls.level) + ' ' + line.text); return; }
-    if (cls.kind === 'ul') { chunks.push('- ' + line.text.replace(BULLET, '')); return; }
-    if (cls.kind === 'ol') {
-      const m = line.text.match(NUMBER);
-      chunks.push(`${m[1]}. ` + line.text.slice(m[0].length));
-      return;
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Word (.docx) from the model \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   A .docx is a ZIP of XML parts. Stored (uncompressed) entries keep the
+   writer small and need no library; Word reads them like any other. Khmer is
+   a complex script in Word, so every run sets the complex-script font, size
+   and bold (w:cs, w:szCs, w:bCs) beside the ordinary ones. */
+
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+/** A ZIP archive of stored entries. files: [{ name, data: Uint8Array }]. */
+function zipStore(files) {
+  const enc = new TextEncoder();
+  const parts = [], central = [];
+  let offset = 0;
+  const u16 = (v) => [v & 0xff, (v >>> 8) & 0xff];
+  const u32 = (v) => [v & 0xff, (v >>> 8) & 0xff, (v >>> 16) & 0xff, (v >>> 24) & 0xff];
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const crc = crc32(f.data), size = f.data.length;
+    const local = new Uint8Array([0x50, 0x4b, 0x03, 0x04, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+      ...u32(crc), ...u32(size), ...u32(size), ...u16(name.length), ...u16(0)]);
+    parts.push(local, name, f.data);
+    central.push(new Uint8Array([0x50, 0x4b, 0x01, 0x02, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21),
+      ...u32(crc), ...u32(size), ...u32(size), ...u16(name.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(offset)]), name);
+    offset += local.length + name.length + size;
+  }
+  const cdSize = central.reduce((a, p) => a + p.length, 0);
+  const end = new Uint8Array([0x50, 0x4b, 0x05, 0x06, ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length),
+    ...u32(cdSize), ...u32(offset), ...u16(0)]);
+  const all = [...parts, ...central, end];
+  const out = new Uint8Array(all.reduce((a, p) => a + p.length, 0));
+  let at = 0;
+  for (const p of all) { out.set(p, at); at += p.length; }
+  return out;
+}
+
+// XML 1.0 forbids most control characters; a PDF can carry them.
+const xmlText = (s) => s.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const xmlAttr = (s) => xmlText(s).replace(/"/g, '&quot;');
+const tw = (pt) => Math.max(0, Math.round(pt * 20));        // points to twentieths of a point
+
+function runXml(r, size, fonts) {
+  const font = xmlAttr(r.display && fonts.display ? fonts.display : fonts.body);
+  const rpr = `<w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:eastAsia="${font}" w:cs="${font}"/>`
+    + (r.bold ? '<w:b/><w:bCs/>' : '')
+    + `<w:sz w:val="${Math.round(size * 2)}"/><w:szCs w:val="${Math.round(size * 2)}"/>`
+    + (r.under ? '<w:u w:val="single"/>' : '') + '<w:lang w:bidi="km-KH"/></w:rPr>';
+  return r.text.split('\t').map((piece, i) =>
+    (i ? `<w:r>${rpr}<w:tab/></w:r>` : '') + (piece ? `<w:r>${rpr}<w:t xml:space="preserve">${xmlText(piece)}</w:t></w:r>` : '')).join('');
+}
+
+function paragraphXml(b, fonts, breakBefore) {
+  const jc = b.align === 'center' ? 'center' : b.align === 'right' ? 'right' : b.justify ? 'both' : 'left';
+  let ind = '';
+  if (b.centerAt !== undefined && b.textW) {
+    const shift = 2 * b.centerAt - b.textW;             // centring between indents moves the axis by half
+    ind = shift >= 0 ? `<w:ind w:left="${tw(shift)}"/>` : `<w:ind w:right="${tw(-shift)}"/>`;
+  } else if (b.type === 'li') ind = `<w:ind w:left="${tw(b.textIndent)}" w:hanging="${tw(b.textIndent - b.markerIndent)}"/>`;
+  else if (b.type === 'p' && b.align === 'left') {
+    const cont = b.contIndent ?? b.indent ?? 0, first = (b.indent ?? 0) - cont;
+    ind = `<w:ind w:left="${tw(cont)}"${first > 0 ? ` w:firstLine="${tw(first)}"` : first < 0 ? ` w:hanging="${tw(-first)}"` : ''}/>`;
+  }
+  const ppr = '<w:pPr>' + (b.type === 'h' ? '<w:keepNext/>' : '') + (breakBefore ? '<w:pageBreakBefore/>' : '')
+    + (b.tab ? `<w:tabs><w:tab w:val="${b.tab.type}" w:pos="${tw(b.tab.pos)}"/></w:tabs>` : '')
+    + `<w:spacing w:before="${tw(Math.min(b.before || 0, 36))}" w:after="0"/>` + ind + `<w:jc w:val="${jc}"/>`
+    + (b.type === 'h' ? `<w:outlineLvl w:val="${b.level - 1}"/>` : '') + '</w:pPr>';
+  let body = '';
+  if (b.type === 'li') body += runXml({ text: b.marker + '\t' }, b.size, fonts);
+  for (const r of b.runs) body += runXml(r, b.size, fonts);
+  return `<w:p>${ppr}${body}</w:p>`;
+}
+
+function tableXml(b, fonts) {
+  const widths = b.widths.map(tw);
+  const border = b.ruled ? 'w:val="single" w:sz="4" w:space="0" w:color="000000"' : 'w:val="nil"';
+  const borders = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map((s) => `<w:${s} ${border}/>`).join('');
+  const rows = b.rows.map((row) => '<w:tr>' + row.map((cell, i) =>
+    `<w:tc><w:tcPr><w:tcW w:w="${widths[i] || widths[widths.length - 1]}" w:type="dxa"/></w:tcPr>`
+    + `<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr>${cell.map((r) => runXml(r, b.size, fonts)).join('')}</w:p></w:tc>`).join('') + '</w:tr>').join('');
+  // tblPr children keep the schema's order, which Word enforces: width, borders, layout, margins
+  return `<w:tbl><w:tblPr><w:tblW w:w="${widths.reduce((a, w) => a + w, 0)}" w:type="dxa"/>`
+    + `<w:tblBorders>${borders}</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="40" w:type="dxa"/><w:right w:w="40" w:type="dxa"/></w:tblCellMar></w:tblPr>`
+    + `<w:tblGrid>${widths.map((w) => `<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${rows}</w:tbl>`;
+}
+
+/** pages: [{ blocks, frame: { wPt, hPt, left, right, top, bottom } }]. Returns a Blob. */
+function pagesToDocx(pages, fonts) {
+  let body = '';
+  pages.forEach((page, n) => {
+    let pending = n > 0;                                   // each PDF page starts a Word page
+    for (const b of page.blocks) {
+      if (b.type === 'table') {
+        if (pending) { body += '<w:p><w:pPr><w:pageBreakBefore/><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>'; pending = false; }
+        body += tableXml(b, fonts) + '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>';
+      } else {
+        body += paragraphXml(b, fonts, pending);
+        pending = false;
+      }
     }
-    if (!opts.join) { para.push(line.text); return; }
-    if (!para.length) { para.push(line.text); return; }
-    const last = para[para.length - 1];
-    if (/-$/.test(last) && /^[a-zA-Z]/.test(line.text)) para[para.length - 1] = last.slice(0, -1) + line.text;
-    else if (KH_END.test(last) && KH_START.test(line.text)) para[para.length - 1] = last + line.text;
-    else para[para.length - 1] = last + ' ' + line.text;
-  }
+    if (pending) body += '<w:p><w:pPr><w:pageBreakBefore/></w:pPr></w:p>';
+  });
+  const f = (pages.find((p) => p.frame) || {}).frame || { wPt: 595, hPt: 842, left: 72, right: 72, top: 72, bottom: 72 };
+  const clamp = (v) => Math.min(144, Math.max(18, v));
+  const sect = `<w:sectPr><w:pgSz w:w="${tw(f.wPt)}" w:h="${tw(f.hPt)}"/>`
+    + `<w:pgMar w:top="${tw(clamp(f.top))}" w:right="${tw(clamp(f.right))}" w:bottom="${tw(clamp(f.bottom))}" w:left="${tw(clamp(f.left))}" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>`;
+  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document ${W}><w:body>${body}${sect}</w:body></w:document>`;
+  const font = xmlAttr(fonts.body);
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:styles ${W}>`
+    + `<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:eastAsia="${font}" w:cs="${font}"/>`
+    + '<w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="en-US" w:bidi="km-KH"/></w:rPr></w:rPrDefault>'
+    + '<w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'
+    + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>';
+  const types = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'
+    + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+    + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>';
+  const R = 'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships ${R}><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const docRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships ${R}><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const enc = new TextEncoder();
+  const zip = zipStore([
+    { name: '[Content_Types].xml', data: enc.encode(types) },
+    { name: '_rels/.rels', data: enc.encode(rels) },
+    { name: 'word/document.xml', data: enc.encode(doc) },
+    { name: 'word/_rels/document.xml.rels', data: enc.encode(docRels) },
+    { name: 'word/styles.xml', data: enc.encode(styles) },
+  ]);
+  return new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 }
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 library loading \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -754,6 +1172,23 @@ async function textLayerBoxes(page, pdfjs) {
   const viewport = page.getViewport({ scale: 1 });
   const content = await page.getTextContent({ includeMarkedContent: false });
   const fonts = Object.values(content.styles || {}).map((st) => st.fontFamily || '').filter(Boolean);
+  // The embedded fonts' real names (KhmerOSmuollight, KhmerOSsiemreap-Bold) say
+  // what the text-content styles do not; they resolve once the page is parsed.
+  const styleOf = new Map();
+  try {
+    await page.getOperatorList();
+    for (const item of content.items) {
+      if (!item.fontName || styleOf.has(item.fontName)) continue;
+      let font = null;
+      try { font = page.commonObjs.get(item.fontName); } catch { /* not resolved */ }
+      const name = (font && (font.name || font.loadedName)) || '';
+      if (name) fonts.push(name.replace(/^[A-Z]{6}\+/, ''));
+      styleOf.set(item.fontName, {
+        display: /mu?ol|moul/i.test(name),
+        bold: !!(font && (font.bold || font.black)) || /bold|black|heavy/i.test(name),
+      });
+    }
+  } catch { /* styles are a refinement */ }
   const boxes = [];
   for (const item of content.items) {
     if (!item.str || item.str.trim() === '') continue;
@@ -763,7 +1198,7 @@ async function textLayerBoxes(page, pdfjs) {
     const w = Math.abs(item.width) || 0;
     const x0 = tm[4];
     const y1 = tm[5];                        // the baseline, in device space
-    boxes.push({ text: item.str, x0, x1: x0 + w, y0: y1 - h, y1, conf: 100 });
+    boxes.push({ text: item.str, x0, x1: x0 + w, y0: y1 - h, y1, conf: 100, fontStyle: styleOf.get(item.fontName) || null });
   }
   return { boxes, fonts, width: viewport.width, height: viewport.height };
 }
@@ -785,6 +1220,96 @@ async function renderPage(page, dpi) {
   return { canvas, scale };
 }
 
+// Per-word ink measures from the page image: how dark the word is (bold), and
+// whether a ruled line runs under it (underline). Words carry x0,y0,x1,y1 in canvas px.
+function measureInk(canvas, words) {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const W = canvas.width, H = canvas.height;
+  const img = ctx.getImageData(0, 0, W, H).data;
+  const dark = (x, y) => {
+    const i = (y * W + x) * 4;
+    return (img[i] * 299 + img[i + 1] * 587 + img[i + 2] * 114) / 1000 < 140;
+  };
+  for (const w of words) {
+    const x0 = Math.max(0, Math.floor(w.x0)), x1 = Math.min(W - 1, Math.ceil(w.x1));
+    const y0 = Math.max(0, Math.floor(w.y0)), y1 = Math.min(H - 1, Math.ceil(w.y1));
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+    if (bw < 3 || bh < 3) { w.ink = 0; w.stroke = 0; w.under = false; continue; }
+    // stroke thickness: dark area over half its boundary, which for a pen stroke
+    // of width t and length L is (t*L)/L = t, whatever shape the glyph takes
+    let area = 0, edge = 0;
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        if (!dark(x, y)) continue;
+        area++;
+        if (x === 0 || y === 0 || x === W - 1 || y === H - 1
+            || !dark(x - 1, y) || !dark(x + 1, y) || !dark(x, y - 1) || !dark(x, y + 1)) edge++;
+      }
+    }
+    w.ink = area / (bw * bh);
+    w.stroke = edge ? (2 * area) / edge : 0;
+    // underline: a row near the foot that is dark almost edge to edge
+    let under = false;
+    // a dash or rule fills its own row: only words with letters or digits can be underlined
+    if (bw < bh * 1.5 || !/[\p{L}\p{N}]/u.test(w.text || '')) { w.under = false; continue; }
+    const from = y0 + Math.floor(bh * 0.55), to = Math.min(H - 1, y1 + Math.ceil(bh * 0.45));
+    for (let y = from; y <= to && !under; y++) {
+      let n = 0;
+      for (let x = x0; x <= x1; x++) if (dark(x, y)) n++;
+      if (n >= bw * 0.9) under = true;
+    }
+    w.under = under;
+  }
+  return words;
+}
+
+/* Clean-up before OCR, for scans only: on a rendered digital page it cost
+   accuracy in testing, on a CamScanner page it gained some. */
+function toGray(canvas) {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const { width: w, height: h } = canvas;
+  const img = ctx.getImageData(0, 0, w, h);
+  const d = img.data;
+  const gray = new Uint8ClampedArray(w * h);
+  for (let i = 0, p = 0; p < gray.length; i += 4, p++) gray[p] = (d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000;
+  return { ctx, img, gray, w, h };
+}
+function writeBack({ ctx, img }, out) {
+  const d = img.data;
+  for (let i = 0, p = 0; p < out.length; i += 4, p++) { d[i] = d[i + 1] = d[i + 2] = out[p]; d[i + 3] = 255; }
+  ctx.putImageData(img, 0, 0);
+}
+// Sauvola: a threshold per pixel from the local mean and spread, so shadows and
+// uneven paper do not swallow faint strokes.
+function preSauvola(canvas, k = 0.2, R = 128) {
+  const g = toGray(canvas);
+  const { w, h, gray } = g;
+  const W = w + 1;
+  const I = new Float64Array(W * (h + 1)), I2 = new Float64Array(W * (h + 1));
+  for (let y = 0; y < h; y++) {
+    let row = 0, row2 = 0;
+    for (let x = 0; x < w; x++) {
+      const v = gray[y * w + x]; row += v; row2 += v * v;
+      I[(y + 1) * W + x + 1] = I[y * W + x + 1] + row;
+      I2[(y + 1) * W + x + 1] = I2[y * W + x + 1] + row2;
+    }
+  }
+  const r = Math.max(8, Math.round(Math.min(w, h) / 60));
+  const out = new Uint8ClampedArray(w * h);
+  for (let y = 0; y < h; y++) {
+    const y0 = Math.max(0, y - r), y1 = Math.min(h, y + r + 1);
+    for (let x = 0; x < w; x++) {
+      const x0 = Math.max(0, x - r), x1 = Math.min(w, x + r + 1);
+      const n = (y1 - y0) * (x1 - x0);
+      const s = I[y1 * W + x1] - I[y0 * W + x1] - I[y1 * W + x0] + I[y0 * W + x0];
+      const s2 = I2[y1 * W + x1] - I2[y0 * W + x1] - I2[y1 * W + x0] + I2[y0 * W + x0];
+      const m = s / n, sd = Math.sqrt(Math.max(0, s2 / n - m * m));
+      out[y * w + x] = gray[y * w + x] > m * (1 + k * (sd / R - 1)) ? 255 : 0;
+    }
+  }
+  writeBack(g, out);
+}
+
 function thumbnail(canvas, maxW = 340) {
   const out = document.createElement('canvas');
   const r = Math.min(1, maxW / canvas.width);
@@ -803,7 +1328,7 @@ async function getOcrWorker(langs, langPath, onProgress) {
   ocrWorker = await Tesseract.createWorker(langs, 1, {
     workerPath: TESS_WORKER,
     corePath: TESS_CORE,
-    langPath,
+    ...(langPath ? { langPath } : {}),
     logger: (m) => {
       if (!onProgress) return;
       const pct = typeof m.progress === 'number' ? Math.round(m.progress * 100) : null;
@@ -841,6 +1366,29 @@ function ocrBoxes(data) {
   return out;
 }
 
+/** For each pixel row, the longest dark run; a table whose rows it crosses is ruled. */
+function ruleFinder(canvas) {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const W = canvas.width, H = canvas.height, d = ctx.getImageData(0, 0, W, H).data;
+  const longest = new Uint32Array(H);
+  for (let y = 0; y < H; y++) {
+    let run = 0, best = 0;
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      if ((d[i] * 299 + d[i + 1] * 587 + d[i + 2] * 114) / 1000 < 140) { run++; if (run > best) best = run; } else run = 0;
+    }
+    longest[y] = best;
+  }
+  return (y0, y1, x0, x1) => {
+    const need = (x1 - x0) * 0.8, pad = Math.round((y1 - y0) * 0.1);
+    let rules = 0;
+    for (let y = Math.max(0, Math.floor(y0) - pad); y <= Math.min(H - 1, Math.ceil(y1) + pad); y++) {
+      if (longest[y] >= need && (y === 0 || longest[y - 1] < need)) rules++;
+    }
+    return rules >= 2;
+  };
+}
+
 async function ocrPage(canvas, settings, onProgress) {
   const worker = await getOcrWorker(settings.langs, settings.langPath, onProgress);
   await worker.setParameters({
@@ -849,7 +1397,8 @@ async function ocrPage(canvas, settings, onProgress) {
     user_defined_dpi: String(settings.dpi),
   });
   const { data } = await worker.recognize(canvas, {}, { text: true, blocks: true, tsv: true });
-  return { boxes: ocrBoxes(data), text: data.text || '', confidence: data.confidence ?? null };
+  const boxes = measureInk(canvas, ocrBoxes(data));
+  return { boxes, text: data.text || '', confidence: data.confidence ?? null, ruled: ruleFinder(canvas) };
 }
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 page ranges \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -900,12 +1449,13 @@ async function extract(file, settings) {
     const page = await pdf.getPage(num);
     const record = { number: num, source: '', markdown: '', plain: '', confidence: null, low: [], thumb: null, note: '' };
 
-    let boxes = [], pageWidth = 0, plain = '';
-    let transform = null;
+    let boxes = [], pageWidth = 0, pageHeight = 0, plain = '', pxPerPt = 1, ocr = null;
+    let transform = null, layerChars = 0;
     if (settings.mode !== 'ocr') {
       const t = await textLayerBoxes(page, pdfjs);
       const raw = t.boxes.map((b) => b.text).join(' ');
       const chars = raw.replace(/\s/g, '').length;
+      layerChars = chars;
       const damage = khmerDamage(normalizeKhmer(raw, settings));
       const unreadable = unreadableTextLayer(raw, t.fonts);
       const thin = chars < TEXT_THIN;
@@ -926,7 +1476,7 @@ async function extract(file, settings) {
           const convert = (txt) => conv.convertLegacyToUnicode(txt, legacy.encoding);
           const sample = convert(raw);
           if (khmerDamage(sample).score <= DAMAGE_MAX && /[\u1780-\u17dd]/.test(sample)) {
-            boxes = t.boxes; pageWidth = t.width;
+            boxes = t.boxes; pageWidth = t.width; pageHeight = t.height;
             transform = (txt) => normalizeKhmer(convert(txt), settings);
             record.source = `converted from ${legacy.encoding}`;
             record.note = legacy.from === 'assumed'
@@ -941,7 +1491,7 @@ async function extract(file, settings) {
       }
 
       if (!boxes.length && (settings.mode === 'text' || (!thin && !broken && !unreadable))) {
-        boxes = t.boxes; pageWidth = t.width; record.source = 'text layer';
+        boxes = t.boxes; pageWidth = t.width; pageHeight = t.height; record.source = 'text layer';
         if (unreadable) record.note = unreadable + ' \u2014 switch to OCR to read this page';
         else if (broken) record.note = 'its text layer looks damaged';
       } else if (!boxes.length && !record.note) {
@@ -959,18 +1509,24 @@ async function extract(file, settings) {
     }
     if (!boxes.length && settings.mode !== 'text') {
       setStatus(`Page ${num} of ${pdf.numPages} \u2014 rendering at ${settings.dpi} dpi`);
-      const { canvas } = await renderPage(page, settings.dpi);
+      const { canvas, scale } = await renderPage(page, settings.dpi);
       record.thumb = thumbnail(canvas);
       if (job.cancelled) throw new Error('cancelled');
-      const ocr = await ocrPage(canvas, settings,
-        (s) => setStatus(`Page ${num} of ${pdf.numPages} \u2014 OCR: ${s}`));
-      boxes = ocr.boxes; pageWidth = canvas.width; plain = ocr.text;
+      const scanned = layerChars < TEXT_THIN;
+      if (settings.cleanup === 'always' || (settings.cleanup === 'auto' && scanned)) {
+        setStatus(`Page ${num} of ${pdf.numPages} \u2014 cleaning up the scan`);
+        preSauvola(canvas);
+      }
+      ocr = await ocrPage(canvas, settings,
+        (st) => setStatus(`Page ${num} of ${pdf.numPages} \u2014 OCR: ${st}`));
+      boxes = ocr.boxes; pageWidth = canvas.width; pageHeight = canvas.height; plain = ocr.text; pxPerPt = scale;
       record.source = 'OCR';
       record.confidence = ocr.confidence;
       record.low = boxes
         .filter((b) => b.conf < settings.confMin)
         .map((b) => `${normalizeKhmer(b.text, settings)} (${Math.round(b.conf)}%)`);
       canvas.width = canvas.height = 0;          // release the big canvas
+      transform = (txt) => fixOcrConfusions(txt);
     }
     if (!record.thumb && settings.thumbs) {
       try {
@@ -981,10 +1537,20 @@ async function extract(file, settings) {
     }
     if (!record.source) record.source = 'empty';
 
-    const prepared = transform ? boxes : boxes.map((b) => ({ ...b, text: normalizeKhmer(b.text, settings) }));
-    const lines = groupLines(prepared, transform);
-    record.markdown = layoutToMarkdown(lines, pageWidth || 612, { ...settings, transform });
-    record.plain = normalizeKhmer(plain, settings) || lines.map((l) => l.text).join('\n');
+    const converted = record.source.startsWith('converted');
+    const prepared = converted ? boxes : boxes.map((b) => ({ ...b, text: normalizeKhmer(b.text, settings) }));
+    let lines = groupLines(prepared, transform);
+    if (ocr) {
+      const khmerPage = lines.filter((l) => /[\u1780-\u17ff]/.test(l.text)).length > lines.length / 2;
+      const junk = lines.filter((l) => isOcrJunk(l, khmerPage));
+      if (junk.length) record.dropped = junk.map((l) => l.text);
+      lines = lines.filter((l) => !isOcrJunk(l, khmerPage));
+    }
+    const geom = { wPx: pageWidth || 612, hPx: pageHeight || 792, pxPerPt, ocr: !!ocr, ruled: ocr ? ocr.ruled : null };
+    record.blocks = layoutBlocks(lines, geom, { ...settings, transform });
+    record.frame = record.blocks.frame;
+    record.markdown = blocksToMarkdown(record.blocks);
+    record.plain = lines.map((l) => l.text).join('\n') || normalizeKhmer(plain, settings);
     pages.push(record);
     page.cleanup();
   }
@@ -1004,45 +1570,60 @@ async function extract(file, settings) {
   };
 }
 
-/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 small Markdown preview \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-   Renders only what this app emits: headings, paragraphs, lists,
-   pipe tables and rules. Text is escaped, so nothing from a PDF
+/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 preview from the model \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   The same blocks the Word file is written from, drawn as HTML, so what you
+   see here is what the .docx will carry. Text is escaped: nothing from a PDF
    can inject markup. */
-function mdToHtml(md) {
-  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const lines = md.split('\n');
-  const out = [];
-  let i = 0, list = null;
-  const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
-  while (i < lines.length) {
-    const line = lines[i];
-    if (/^\s*$/.test(line)) { closeList(); i++; continue; }
-    if (/^---+$/.test(line.trim())) { closeList(); out.push('<hr>'); i++; continue; }
-    let m = line.match(/^(#{1,6})\s+(.*)$/);
-    if (m) { closeList(); out.push(`<h${m[1].length}>${esc(m[2])}</h${m[1].length}>`); i++; continue; }
-    if (/^\s*\|.*\|\s*$/.test(line) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
-      closeList();
-      const cells = (row) => row.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => esc(c.replace(/\\\|/g, '|').trim()));
-      const head = cells(line);
-      i += 2;
-      const body = [];
-      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) body.push(cells(lines[i++]));
-      out.push('<table><thead><tr>' + head.map((c) => `<th>${c}</th>`).join('') + '</tr></thead><tbody>'
-        + body.map((r) => '<tr>' + r.map((c) => `<td>${c}</td>`).join('') + '</tr>').join('')
-        + '</tbody></table>');
-      continue;
-    }
-    m = line.match(/^\s*-\s+(.*)$/);
-    if (m) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul'; } out.push(`<li>${esc(m[1])}</li>`); i++; continue; }
-    m = line.match(/^\s*([0-9\u17e0-\u17e9ivxIVX]+)\.\s+(.*)$/);
-    if (m) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol'; } out.push(`<li>${esc(m[2])}</li>`); i++; continue; }
-    closeList();
-    const para = [];
-    while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,6}\s|\s*\||---+$|\s*-\s)/.test(lines[i])) para.push(lines[i++]);
-    out.push(`<p>${esc(para.join(' ')).replace(/_\(no text on this page\)_/g, '<em>(no text on this page)</em>')}</p>`);
-  }
-  closeList();
-  return out.join('\n');
+const escHtml = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function runsToHtml(runs) {
+  return runs.map((r) => {
+    let h = escHtml(r.text);
+    if (r.under) h = `<u>${h}</u>`;
+    if (r.bold) h = `<b>${h}</b>`;
+    if (r.display) h = `<span class="display">${h}</span>`;
+    return h;
+  }).join('');
+}
+
+function blocksToHtml(pages, pageHeads) {
+  const px = (pt) => `${(pt * 1.25).toFixed(1)}px`;
+  return pages.map((p) => {
+    const head = pageHeads ? `<div class="page-tag">Page ${p.number}</div>` : '';
+    if (!p.blocks || !p.blocks.length) return head + '<p class="empty">(no text on this page)</p>';
+    const body = p.blocks.map((b) => {
+      const size = `font-size:${px(b.size)}`;
+      const gap = b.before ? `;margin-top:${px(Math.min(b.before, 36))}` : '';
+      if (b.type === 'table') {
+        return `<table class="${b.ruled ? 'ruled' : 'bare'}" style="${size}${gap}">`
+          + b.rows.map((r) => '<tr>' + r.map((c, i) => `<td style="width:${(b.widths[i] / b.widths.reduce((a, w) => a + w, 0) * 100).toFixed(1)}%">${runsToHtml(c)}</td>`).join('') + '</tr>').join('')
+          + '</table>';
+      }
+      const align = b.align === 'center' ? 'center' : b.align === 'right' ? 'right' : b.justify ? 'justify' : 'left';
+      let ind = '';
+      if (b.type === 'li') ind = `;padding-left:${px(b.textIndent)};text-indent:-${px(b.textIndent - b.markerIndent)}`;
+      else if (b.type === 'p' && b.align === 'left') {
+        const cont = b.contIndent ?? b.indent ?? 0;
+        ind = `;padding-left:${px(cont)};text-indent:${px((b.indent ?? 0) - cont)}`;
+      }
+      if (b.centerAt !== undefined && b.textW) {
+        const shift = 2 * b.centerAt - b.textW;
+        ind = shift >= 0 ? `;padding-left:${px(shift)}` : `;padding-right:${px(-shift)}`;
+      }
+      const marker = b.type === 'li' ? `<span class="marker" style="width:${px(b.textIndent - b.markerIndent)}">${escHtml(b.marker)}</span>` : '';
+      const tag = b.type === 'h' ? `h${b.level + 1}` : 'p';
+      let inner = marker + runsToHtml(b.runs);
+      if (b.tab) {
+        const at = b.runs.findIndex((r) => r.text === '\t');
+        const l = runsToHtml(b.runs.slice(0, at)), r = runsToHtml(b.runs.slice(at + 1));
+        inner = b.tab.type === 'right'
+          ? `<span class="tabrow"><span>${l}</span><span>${r}</span></span>`
+          : `<span class="tabcol" style="min-width:${px(b.tab.pos - (b.indent || 0))}">${l}</span>${r}`;
+      }
+      return `<${tag} style="text-align:${align};${size}${gap}${ind}">${inner}</${tag}>`;
+    }).join('');
+    return head + `<div class="sheet">${body}</div>`;
+  }).join('');
 }
 
 /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 UI \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -1057,7 +1638,8 @@ function settings() {
     dpi: +el.dpi.value,
     psm: +el.psm.value,
     confMin: +el.confMin.value,
-    langPath: el.tessdata.value.trim().replace(/\/+$/, '') || 'https://tessdata.projectnaptha.com/4.0.0',
+    langPath: el.tessdata.value.trim().replace(/\/+$/, ''),
+    cleanup: el.cleanup.value,
     tables: el.opt.tables.checked,
     headings: el.opt.headings.checked,
     lists: el.opt.lists.checked,
@@ -1100,8 +1682,8 @@ function show(r, s) {
   result = r;
   el.md.textContent = r.markdown;
   el.tx.textContent = r.plain;
-  el.pv.innerHTML = mdToHtml(r.markdown);
-  el.copy.disabled = el.download.disabled = false;
+  el.pv.innerHTML = blocksToHtml(r.pages, s.pageHeads);
+  el.copy.disabled = el.download.disabled = el.docx.disabled = false;
 
   const ocrPages = r.pages.filter((p) => p.source === 'OCR');
   const confs = ocrPages.map((p) => p.confidence).filter((c) => typeof c === 'number');
@@ -1150,7 +1732,7 @@ async function run(ev) {
   const s = settings();
   job = { cancelled: false };
   el.run.disabled = true; el.cancel.disabled = false;
-  el.copy.disabled = el.download.disabled = true;
+  el.copy.disabled = el.download.disabled = el.docx.disabled = true;
   el.md.textContent = ''; el.pv.innerHTML = ''; el.tx.textContent = '';
   el.stats.hidden = el.lowconf.hidden = true;
   setBar(0);
@@ -1201,6 +1783,16 @@ el.download.addEventListener('click', () => {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = (chosen ? chosen.name.replace(/\.pdf$/i, '') : 'extract') + '.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+});
+
+el.docx.addEventListener('click', () => {
+  const fonts = { body: el.bodyFont.value, display: el.displayFont.value || null };
+  const blob = pagesToDocx(result.pages.map((p) => ({ blocks: p.blocks || [], frame: p.frame })), fonts);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (chosen ? chosen.name.replace(/\.pdf$/i, '') : 'extract') + '.docx';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 });

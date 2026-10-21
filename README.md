@@ -80,13 +80,15 @@ The dictionary data is licensed under LGPL-2.1 (`data/LICENSES/LGPL-2.1.txt`); t
 
 ## Khmer PDF OCR (standalone)
 
-`ocr/index.html` is a single file that extracts Khmer and English text from a PDF in the browser and writes it as Markdown, tables and headings included. Open it directly or serve the folder; it needs no build step and no server.
+`ocr/index.html` is a single file that extracts Khmer and English text from a PDF in the browser and keeps the page's form: alignment (including a block centred over part of the page, such as the national motto), indents and hanging lists, type size, bold, underline, Muol display lines, tab stops and tables. It downloads the result as a Word file (`.docx`, schema-valid, with Khmer set as a complex script so Word applies the chosen Khmer fonts) or as Markdown. Open it directly or serve the folder; it needs no build step and no server.
+
+Bold, Muol and underline are not reported by Tesseract, so the page measures them from the image: stroke width (dark area over half its boundary) against the page's body text separates regular, bold and Muol type, and a dark row running the width of a word marks an underline. On two real documents — a Word-made law-firm letter and a CamScanner copy of a ministry notice — OCR accuracy against hand-transcribed text rose from 90.7% to 98.4% and from 95.2% to 96.5%, mostly by reading the page as one column (Tesseract page-segmentation mode 4) instead of letting it guess the layout, which dropped whole lines of indented lists. Scans also get an adaptive (Sauvola) threshold, two OCR confusions are corrected (`៖` glued to a letter is `ះ`; a Latin `0` beside a Khmer digit is `០`), and stamp, logo and watermark noise is removed.
 
 A page set in a pre-Unicode font — Limon, ABC, Khek, Baidok, Rasmei, Kaoh Kong, Truth, FK — is converted byte for byte into Unicode rather than guessed at by OCR. Such a PDF carries a text layer of Latin byte values that extracts as nonsense (`rnfij~~~S~5.Q~ffi$G`); the page recognises it by the font name, by cp1252 oddities among the letters, or by the shape of the words, converts it with the Khmer Software Initiative's font tables, and says on which pages it did so. Conversion is exact where OCR is approximate.
 
 It reads a page from the PDF's own text layer when that layer is sound, and falls back to Tesseract OCR (`khm`, `eng`) when the layer is missing or damaged — the usual case for Khmer PDFs, whose shaped glyphs map back to no Unicode at all. Khmer output is put in storage order: pre-base vowels move after their consonant, `េ`+`ី` becomes `ើ`, coeng sub-consonants stay with their base, deprecated characters are replaced, and the whole text is normalized to NFC. OCR words below a confidence you choose are listed for checking against the page image.
 
-PDF.js and Tesseract.js are fetched from a CDN on first use, and the language data from `tessdata.projectnaptha.com` (the Advanced panel takes another host if yours is blocked). The PDF itself never leaves the machine.
+PDF.js, Tesseract.js, its `best_int` language models and the legacy-font converter are fetched from cdn.jsdelivr.net on first use. The PDF itself never leaves the machine.
 
 ## Project layout
 
