@@ -24,12 +24,15 @@ The legal term list was compiled from terms as commonly used in the Constitution
 | playwright-core 1.56.1 | Apache-2.0 | Headless Chromium for PDF reports |
 | @anthropic-ai/sdk 0.132.1, zod 3.25.76 | MIT | Optional AI review |
 | Poppler `pdftotext` (external) | GPL-2.0 or later | Server-side PDF text extraction, run as a separate program |
-| Tesseract with the `khm` model (external) | Apache-2.0 | Textbook OCR |
+| Tesseract with the `khm` model (external) | Apache-2.0 | Textbook OCR; Khmer and English OCR in `ocr/index.html`, loaded from a CDN as `tesseract.js` |
+| khmer-unicode-converter 1.0.1 (CDN, used by `ocr/index.html`) | LGPL-2.1 | Legacy Khmer encodings (Limon, ABC, Khek, Baidok, Rasmei, Kaoh Kong, Truth, FK) converted to Unicode. A TypeScript port of the Khmer Software Initiative's KhmerConverter (O. Berten), whose font tables it carries. |
 
 ## Standards
 
 - The Unicode Standard, chapter 16.4 (Khmer): storage order within an orthographic cluster, deprecated characters. Normalisation follows the same ordering as the widely used *khnormal* algorithm (M. Hosken, SIL).
 
 ## Redistribution checklist
+
+The OCR page loads pdf.js, Tesseract.js and khmer-unicode-converter from a CDN rather than bundling them, so no third-party code is redistributed with this repository; the credits stay in the page footer.
 
 When you publish the app or its data: keep `data/LICENSES/LGPL-2.1.txt` with `data/lexicon.json` (the static build copies it); keep the credit to the Open Institute and the Buddhist Institute (about page and reports); do not publish the grammar-textbook scan or its full OCR text without permission; and check the NCKL terms of use before importing its terminology in bulk.

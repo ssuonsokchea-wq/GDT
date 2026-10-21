@@ -117,7 +117,7 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
 <header class="top">
   <div>
     <h1>Khmer PDF OCR <span class="kh">· ស្រង់អត្ថបទពី PDF</span></h1>
-    <p class="sub">Reads Khmer and English PDFs in your browser. It uses the file's own text layer where there is a sound one, and Tesseract OCR where the text layer is missing or comes back broken — as it does in many Khmer PDFs, whose shaped glyphs map back to nothing. The result is written as Markdown, with tables and headings kept. Nothing leaves your machine except the one-time download of the OCR engine and language data.</p>
+    <p class="sub">Reads Khmer and English PDFs in your browser. It uses the file's own text layer where there is a sound one, and Tesseract OCR where the text layer is missing or comes back broken — as it does in many Khmer PDFs, whose shaped glyphs map back to nothing. A page set in a pre-Unicode font &mdash; Limon, ABC, Khek and the rest &mdash; is converted byte for byte into Unicode instead, which is exact where OCR only guesses. The result is written as Markdown, with tables and headings kept. Nothing leaves your machine except the one-time download of the OCR engine and language data.</p>
   </div>
   <button class="theme-toggle small" id="theme" type="button" aria-label="Switch colour theme">◐ Theme</button>
 </header>
@@ -147,6 +147,22 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
         <option value="khm">Khmer only</option>
         <option value="eng">English only</option>
         <option value="khm+eng+fra">Khmer + English + French</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="legacy">Legacy Khmer encoding</label>
+      <select id="legacy">
+        <option value="auto" selected>Auto &mdash; convert when the text layer is not Unicode</option>
+        <option value="off">Off &mdash; never convert</option>
+        <option value="limon">Limon</option>
+        <option value="abc-zwsp">ABC</option>
+        <option value="khek">Khek</option>
+        <option value="baidok">Baidok</option>
+        <option value="rasmei">Rasmei</option>
+        <option value="kaohkong">Kaoh Kong</option>
+        <option value="truth">Truth</option>
+        <option value="fk">FK</option>
       </select>
     </div>
 
@@ -243,7 +259,7 @@ footer.foot{margin-top:28px; font-size:.82rem; color:var(--ink-soft); max-width:
 </div>
 
 <footer class="foot">
-  <p>OCR is a starting point for transcription, never a source to quote. Khmer OCR commonly loses a coeng or a vowel sign — read the page image beside the text before you rely on it. The engine (<a href="https://github.com/naptha/tesseract.js">Tesseract.js</a>, Apache-2.0) and the rendering library (<a href="https://mozilla.github.io/pdf.js/">PDF.js</a>, Apache-2.0) are fetched from a CDN on first use; the PDF itself is read locally and never uploaded.</p>
+  <p>OCR is a starting point for transcription, never a source to quote. Khmer OCR commonly loses a coeng or a vowel sign — read the page image beside the text before you rely on it. The engine (<a href="https://github.com/naptha/tesseract.js">Tesseract.js</a>, Apache-2.0), the rendering library (<a href="https://mozilla.github.io/pdf.js/">PDF.js</a>, Apache-2.0) and the legacy-font converter (<a href="https://www.npmjs.com/package/khmer-unicode-converter">khmer-unicode-converter</a>, LGPL-2.1, a port of the Khmer Software Initiative's <a href="https://github.com/olivierberten/KhmerConverter">KhmerConverter</a>) are fetched from a CDN on first use; the PDF itself is read locally and never uploaded.</p>
 </footer>
 </div>
 
@@ -258,14 +274,16 @@ const TESS_WORKER  = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worke
 const TESS_CORE    = 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/';
 const PDFJS_CMAPS  = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/';
 const PDFJS_FONTS  = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/';
+const KHMERCONV    = 'https://cdn.jsdelivr.net/npm/khmer-unicode-converter@1.0.1/dist/index.js';
 const MAX_CANVAS   = 4200;   // longest canvas edge, in pixels
 const TEXT_THIN    = 120;    // characters below which a text layer counts as absent
+const LEGACY_MIN   = 20;     // characters enough to be worth converting from a legacy encoding
 const DAMAGE_MAX   = 0.08;   // damage score above which a Khmer text layer is not trusted
 
 const $ = (id) => document.getElementById(id);
 const el = {
   file:$('file'), drop:$('drop'), dropName:$('dropName'), dropHint:$('dropHint'),
-  mode:$('mode'), langs:$('langs'), pages:$('pages'), pagesHint:$('pagesHint'),
+  mode:$('mode'), langs:$('langs'), legacy:$('legacy'), pages:$('pages'), pagesHint:$('pagesHint'),
   dpi:$('dpi'), dpiOut:$('dpiOut'), tessdata:$('tessdata'), psm:$('psm'),
   confMin:$('confMin'), confOut:$('confOut'),
   run:$('run'), cancel:$('cancel'), status:$('status'), bar:$('bar'),
@@ -371,11 +389,16 @@ function repairVisualOrder(s) {
       if (isMark(m)) { marks.push(s[j]); j += 1; continue; }
       break;
     }
+    const pairAt = c === 0x17c1 ? marks.findIndex((m) => PRE_PAIRS.has(m)) : -1;
+    // A vowel that already follows a Khmer letter may well be in logical order
+    // (\u179f\u17c1\u1785 is correct as it stands), so only the halves of a split vowel
+    // justify moving it. A vowel opening a word has nothing before it to belong
+    // to, and is always out of place.
+    const prev = i > 0 ? CP(s, i - 1) : 0;
+    const afterKhmer = prev >= 0x1780 && prev <= 0x17dd;
+    if (afterKhmer && pairAt === -1) { out += s[i++]; continue; }
     let vowel = String.fromCodePoint(c);
-    if (c === 0x17c1) {
-      const at = marks.findIndex((m) => PRE_PAIRS.has(m));
-      if (at !== -1) { vowel = PRE_PAIRS.get(marks[at]); marks.splice(at, 1); }
-    }
+    if (pairAt !== -1) { vowel = PRE_PAIRS.get(marks[pairAt]); marks.splice(pairAt, 1); }
     out += base + marks.join('') + vowel;
     i = j;
   }
@@ -425,7 +448,7 @@ const KHMER_FAMILY = /khmer|battambang|moul|siemreap|bokor|content|dangrek|freeh
 function latinGarble(text) {
   const letters = (text.match(/[A-Za-z]/g) || []).length;
   const tokens = text.split(/\s+/).filter((t) => /[A-Za-z]/.test(t));
-  if (letters < 40 || tokens.length < 8) return 0;
+  if (letters < 25 || tokens.length < 4) return 0;
   const odd = (t) => /[^A-Za-z0-9'".,;:()\-\/%&]/.test(t);
   const vowelless = (t) => {
     const only = t.replace(/[^A-Za-z]/g, '');
@@ -442,6 +465,17 @@ function latinGarble(text) {
    font whose shaped glyphs map back to nothing; and text that is simply
    garbled. Returns a sentence for the page note, or null when the layer is
    sound. */
+/* Legacy encodings reach past ASCII for the glyphs Khmer needs, so their text
+   is sprinkled with characters that ordinary prose almost never carries at this
+   density: \u00fe \u00fa \u00bd and their kin. */
+const ODD_BYTES = /[\u00fe\u00de\u00f0\u00d0\u00f8\u00d8\u00e6\u00c6\u00fd\u00dd\u00ff\u00bc\u00bd\u00be\u00d7\u00f7\u00b5\u00b6\u00a7\u00a2\u00a3\u00a5\u00b1\u00b9\u00b2\u00b3\u00a1\u00bf\u0192\u017e\u0161]/g;
+
+function oddByteRatio(text) {
+  const letters = (text.match(/[A-Za-z]/g) || []).length;
+  if (letters < 20) return 0;
+  return (text.match(ODD_BYTES) || []).length / letters;
+}
+
 function unreadableTextLayer(text, fonts) {
   if (/[\u1780-\u17ff]/.test(text)) return null;      // real Khmer Unicode: the layer is readable
   if (text.replace(/\s/g, '').length < 40) return null;
@@ -452,6 +486,8 @@ function unreadableTextLayer(text, fonts) {
   if (khmerFont) return `the page is set in ${khmerFont} but its text layer holds no Khmer Unicode`;
   const garble = latinGarble(text);
   if (garble >= 0.35) return `its text layer reads as legacy-font bytes (${Math.round(garble * 100)}% of words malformed)`;
+  const odd = oddByteRatio(text);
+  if (odd >= 0.03) return `its text layer carries legacy-font byte values (${Math.round(odd * 100)} per 100 letters)`;
   return null;
 }
 
@@ -467,7 +503,7 @@ const KH_END        = /[\u1780-\u17dd]$/;
 const KH_START      = /^[\u1780-\u17dd]/;
 
 /** Join the boxes of one line into a string, inserting spaces only where a gap earns one. */
-function joinLine(items) {
+function joinLine(items, transform) {
   const widths = items.map((it) => (it.x1 - it.x0) / Math.max(1, [...it.text].length));
   const charW = median(widths.filter((w) => w > 0)) || 4;
   const h = median(items.map((it) => it.y1 - it.y0)) || 10;
@@ -483,11 +519,12 @@ function joinLine(items) {
     if (!tight && !spaced && gap > minGap) s += ' ';
     s += cur;
   }
-  return s.replace(/[ \t]{2,}/g, ' ').trim();
+  const out = s.replace(/[ \t]{2,}/g, ' ').trim();
+  return transform ? transform(out) : out;
 }
 
 /** Group word/run boxes into lines, top to bottom. */
-function groupLines(items) {
+function groupLines(items, transform) {
   const good = items.filter((it) => it.text && it.text.trim() !== '');
   if (!good.length) return [];
   const h = median(good.map((it) => it.y1 - it.y0)) || 10;
@@ -507,7 +544,7 @@ function groupLines(items) {
     l.items.sort((a, b) => a.x0 - b.x0);
     return {
       items: l.items,
-      text: joinLine(l.items),
+      text: joinLine(l.items, transform),
       x0: Math.min(...l.items.map((i) => i.x0)),
       x1: Math.max(...l.items.map((i) => i.x1)),
       y0: Math.min(...l.items.map((i) => i.y0)),
@@ -569,7 +606,7 @@ function findTables(lines, pageWidth) {
 
 const escapeCell = (s) => s.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
 
-function tableToMarkdown(lines, bounds) {
+function tableToMarkdown(lines, bounds, transform) {
   const edges = [-Infinity, ...bounds, Infinity];
   const cols = edges.length - 1;
   const rows = lines.map((line) => {
@@ -580,7 +617,7 @@ function tableToMarkdown(lines, bounds) {
       while (c < cols - 1 && mid >= edges[c + 1]) c++;
       cells[c].push(it);
     }
-    return cells.map((group) => (group.length ? escapeCell(joinLine(group)) : ''));
+    return cells.map((group) => (group.length ? escapeCell(joinLine(group, transform)) : ''));
   }).filter((r) => r.some((c) => c !== ''));
   if (rows.length < 2) return null;
   const head = rows[0];
@@ -625,7 +662,7 @@ function layoutToMarkdown(lines, pageWidth, opts) {
 
   for (const b of blocks) {
     if (b.table) {
-      const md = tableToMarkdown(lines.slice(b.from, b.to + 1), b.bounds);
+      const md = tableToMarkdown(lines.slice(b.from, b.to + 1), b.bounds, opts.transform);
       if (md) { flush(); chunks.push(md); continue; }
       // not convincing as a table after all: fall through as text
       for (let k = b.from; k <= b.to; k++) addText(lines[k], k);
@@ -671,6 +708,33 @@ function loadPdfjs() {
   }
   return pdfjsPromise;
 }
+let convPromise = null;
+function loadConverter() {
+  if (!convPromise) convPromise = import(KHMERCONV);
+  return convPromise;
+}
+
+/* Which legacy encoding a page is in. The font name settles it when the PDF
+   names its fonts; otherwise garbled text is taken as Limon, by far the most
+   common of them, and the page note says the choice was a guess. */
+const ENCODING_BY_FONT = [
+  [/limon/i, 'limon'],
+  [/khek/i, 'khek'],
+  [/baidok/i, 'baidok'],
+  [/rasmei/i, 'rasmei'],
+  [/kaoh[\s_-]?kong/i, 'kaohkong'],
+  [/truth/i, 'truth'],
+  [/[^a-z]fk[^a-z]|^fk/i, 'fk'],
+  [/abc/i, 'abc-zwsp'],
+];
+
+function legacyEncodingFor(fonts) {
+  for (const name of fonts || []) {
+    for (const [re, enc] of ENCODING_BY_FONT) if (re.test(name)) return { encoding: enc, from: name };
+  }
+  return null;
+}
+
 let tessPromise = null;
 function loadTesseract() {
   if (!tessPromise) {
@@ -837,27 +901,60 @@ async function extract(file, settings) {
     const record = { number: num, source: '', markdown: '', plain: '', confidence: null, low: [], thumb: null, note: '' };
 
     let boxes = [], pageWidth = 0, plain = '';
+    let transform = null;
     if (settings.mode !== 'ocr') {
       const t = await textLayerBoxes(page, pdfjs);
       const raw = t.boxes.map((b) => b.text).join(' ');
       const chars = raw.replace(/\s/g, '').length;
       const damage = khmerDamage(normalizeKhmer(raw, settings));
-      const legacy = unreadableTextLayer(raw, t.fonts);
+      const unreadable = unreadableTextLayer(raw, t.fonts);
       const thin = chars < TEXT_THIN;
       const broken = damage.score > DAMAGE_MAX;
-      if (settings.mode === 'text' || (!thin && !broken && !legacy)) {
+
+      // A legacy-encoded layer is not lost text: converting its bytes gives
+      // exact Unicode, which beats anything OCR can read off the page.
+      let legacy = null;
+      if (chars >= LEGACY_MIN && settings.encoding !== 'off' && (unreadable || settings.encoding !== 'auto')) {
+        legacy = settings.encoding === 'auto'
+          ? (legacyEncodingFor(t.fonts) || { encoding: 'limon', from: 'assumed' })
+          : { encoding: settings.encoding, from: 'your choice' };
+      }
+      if (legacy) {
+        setStatus(`Page ${num} of ${pdf.numPages} \u2014 converting ${legacy.encoding} text`);
+        try {
+          const conv = await loadConverter();
+          const convert = (txt) => conv.convertLegacyToUnicode(txt, legacy.encoding);
+          const sample = convert(raw);
+          if (khmerDamage(sample).score <= DAMAGE_MAX && /[\u1780-\u17dd]/.test(sample)) {
+            boxes = t.boxes; pageWidth = t.width;
+            transform = (txt) => normalizeKhmer(convert(txt), settings);
+            record.source = `converted from ${legacy.encoding}`;
+            record.note = legacy.from === 'assumed'
+              ? 'no font name in the PDF, so Limon was assumed \u2014 set the encoding by hand if this reads wrong'
+              : `converted from ${legacy.encoding} (${legacy.from})`;
+          } else {
+            record.note = `${legacy.encoding} conversion produced no Khmer, so the page was read by OCR`;
+          }
+        } catch (e) {
+          record.note = 'the legacy converter could not be loaded: ' + (e && e.message ? e.message : e);
+        }
+      }
+
+      if (!boxes.length && (settings.mode === 'text' || (!thin && !broken && !unreadable))) {
         boxes = t.boxes; pageWidth = t.width; record.source = 'text layer';
-        if (legacy) record.note = legacy + ' \u2014 switch to OCR to read this page';
+        if (unreadable) record.note = unreadable + ' \u2014 switch to OCR to read this page';
         else if (broken) record.note = 'its text layer looks damaged';
-      } else if (legacy) {
-        record.note = `read by OCR: ${legacy}`;
-      } else if (broken) {
-        const found = [
-          damage.dotted && `${damage.dotted} dotted circle${damage.dotted === 1 ? '' : 's'}`,
-          damage.orphans && `${damage.orphans} mark${damage.orphans === 1 ? '' : 's'} without a base`,
-          damage.fragments && `${damage.fragments} broken fragment${damage.fragments === 1 ? '' : 's'}`,
-        ].filter(Boolean).join(', ');
-        record.note = `text layer rejected \u2014 ${found} in ${damage.letters} letters`;
+      } else if (!boxes.length && !record.note) {
+        if (unreadable) {
+          record.note = `read by OCR: ${unreadable}`;
+        } else if (broken) {
+          const found = [
+            damage.dotted && `${damage.dotted} dotted circle${damage.dotted === 1 ? '' : 's'}`,
+            damage.orphans && `${damage.orphans} mark${damage.orphans === 1 ? '' : 's'} without a base`,
+            damage.fragments && `${damage.fragments} broken fragment${damage.fragments === 1 ? '' : 's'}`,
+          ].filter(Boolean).join(', ');
+          record.note = `text layer rejected \u2014 ${found} in ${damage.letters} letters`;
+        }
       }
     }
     if (!boxes.length && settings.mode !== 'text') {
@@ -884,8 +981,9 @@ async function extract(file, settings) {
     }
     if (!record.source) record.source = 'empty';
 
-    const lines = groupLines(boxes.map((b) => ({ ...b, text: normalizeKhmer(b.text, settings) })));
-    record.markdown = layoutToMarkdown(lines, pageWidth || 612, settings);
+    const prepared = transform ? boxes : boxes.map((b) => ({ ...b, text: normalizeKhmer(b.text, settings) }));
+    const lines = groupLines(prepared, transform);
+    record.markdown = layoutToMarkdown(lines, pageWidth || 612, { ...settings, transform });
     record.plain = normalizeKhmer(plain, settings) || lines.map((l) => l.text).join('\n');
     pages.push(record);
     page.cleanup();
@@ -954,6 +1052,7 @@ function settings() {
   return {
     mode: el.mode.value,
     langs: el.langs.value,
+    encoding: el.legacy.value,
     pages: el.pages.value,
     dpi: +el.dpi.value,
     psm: +el.psm.value,

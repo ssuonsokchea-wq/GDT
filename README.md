@@ -82,6 +82,8 @@ The dictionary data is licensed under LGPL-2.1 (`data/LICENSES/LGPL-2.1.txt`); t
 
 `ocr/index.html` is a single file that extracts Khmer and English text from a PDF in the browser and writes it as Markdown, tables and headings included. Open it directly or serve the folder; it needs no build step and no server.
 
+A page set in a pre-Unicode font — Limon, ABC, Khek, Baidok, Rasmei, Kaoh Kong, Truth, FK — is converted byte for byte into Unicode rather than guessed at by OCR. Such a PDF carries a text layer of Latin byte values that extracts as nonsense (`rnfij~~~S~5.Q~ffi$G`); the page recognises it by the font name, by cp1252 oddities among the letters, or by the shape of the words, converts it with the Khmer Software Initiative's font tables, and says on which pages it did so. Conversion is exact where OCR is approximate.
+
 It reads a page from the PDF's own text layer when that layer is sound, and falls back to Tesseract OCR (`khm`, `eng`) when the layer is missing or damaged — the usual case for Khmer PDFs, whose shaped glyphs map back to no Unicode at all. Khmer output is put in storage order: pre-base vowels move after their consonant, `េ`+`ី` becomes `ើ`, coeng sub-consonants stay with their base, deprecated characters are replaced, and the whole text is normalized to NFC. OCR words below a confidence you choose are listed for checking against the page image.
 
 PDF.js and Tesseract.js are fetched from a CDN on first use, and the language data from `tessdata.projectnaptha.com` (the Advanced panel takes another host if yours is blocked). The PDF itself never leaves the machine.
