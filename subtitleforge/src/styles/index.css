@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Fonts are bundled, not fetched: an offline application that reaches for a web
+  font on first run has nothing to reach with. The files are not in version
+  control (see assets/fonts/README.md); `swap` means a missing file falls back
+  to the system stack immediately rather than leaving text invisible.
+*/
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../assets/fonts/Inter-Variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../../assets/fonts/JetBrainsMono-Variable.woff2') format('woff2');
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --timeline-grid: rgba(255, 255, 255, 0.05);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    font-feature-settings: 'cv05' 1, 'ss03' 1, 'tnum' 0;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* Text the user is actually editing must behave like text. */
+  input,
+  textarea,
+  [contenteditable='true'],
+  .selectable {
+    user-select: text;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2b323f;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a4252;
+    background-clip: content-box;
+  }
+
+  :focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-panel-900 border border-panel-750 rounded-lg;
+  }
+
+  .panel-header {
+    @apply flex items-center justify-between gap-2 px-3 h-9 border-b border-panel-750 text-2xs font-semibold uppercase tracking-wider text-ink-400;
+  }
+
+  .field-label {
+    @apply text-2xs font-medium uppercase tracking-wide text-ink-400;
+  }
+
+  .hairline {
+    @apply border-panel-750;
+  }
+
+  /* The timeline's second markers, drawn in CSS so scrolling stays on the
+     compositor rather than repainting a canvas grid. */
+  .timeline-grid {
+    background-image: linear-gradient(to right, var(--timeline-grid) 0 1px, transparent 1px 100%);
+  }
+
+  .cue-block {
+    @apply absolute top-0 bottom-0 rounded border text-2xs overflow-hidden;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+
+  .drag-handle {
+    @apply absolute top-0 bottom-0 w-1.5 cursor-ew-resize;
+  }
+
+  .drag-handle::after {
+    content: '';
+    @apply absolute inset-y-1 left-1/2 w-0.5 -translate-x-1/2 rounded bg-white/40 opacity-0;
+    transition: opacity 120ms ease;
+  }
+
+  .drag-handle:hover::after {
+    @apply opacity-100;
+  }
+}
+
+/* Honour the operating system's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

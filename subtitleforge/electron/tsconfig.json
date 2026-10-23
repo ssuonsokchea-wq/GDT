@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    // NodeNext decides each file's output format from its extension: main.ts
+    // becomes ESM (the package is "type": "module"), preload.cts becomes
+    // preload.cjs, which is what a preload script has to be.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "../dist/electron",
+    "rootDir": ".",
+    "types": ["node", "electron"]
+  },
+  "include": ["."]
+}

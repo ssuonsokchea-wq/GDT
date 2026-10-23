@@ -1,0 +1,65 @@
+{
+  "name": "subtitleforge-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline AI subtitle generation, editing, styling and burn-in for desktop.",
+  "author": {
+    "name": "SubtitleForge",
+    "email": "support@subtitleforge.local"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "main": "dist/electron/main.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n vite,electron -c cyan,magenta \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "npm run build:electron && cross-env NODE_ENV=development electron .",
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "backend:dev": "python -m subtitleforge --port 8756 --token dev-token",
+    "backend:build": "node scripts/build-backend.mjs",
+    "package": "npm run build && npm run backend:build && electron-builder --publish never",
+    "package:win": "npm run build && npm run backend:build && electron-builder --win --publish never",
+    "package:dir": "npm run build && electron-builder --dir --publish never",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p electron/tsconfig.json --noEmit",
+    "lint": "eslint src electron --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:backend": "cd backend && python -m pytest -q",
+    "fetch-models": "node scripts/fetch-models.mjs"
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "lucide-react": "0.469.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "5.0.2"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/react": "16.1.0",
+    "@types/node": "22.10.5",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@typescript-eslint/eslint-plugin": "8.19.1",
+    "@typescript-eslint/parser": "8.19.1",
+    "@vitejs/plugin-react": "4.3.4",
+    "autoprefixer": "10.4.20",
+    "concurrently": "9.1.2",
+    "cross-env": "7.0.3",
+    "electron": "33.3.1",
+    "electron-builder": "25.1.8",
+    "eslint": "9.17.0",
+    "eslint-plugin-react-hooks": "5.1.0",
+    "jsdom": "25.0.1",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.2",
+    "vite": "6.0.7",
+    "vitest": "2.1.8"
+  }
+}

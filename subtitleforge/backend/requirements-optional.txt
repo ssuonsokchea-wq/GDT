@@ -1,0 +1,9 @@
+# Optional, user-installed extras. The application works without them and
+# says so in Settings; neither is ever fetched automatically.
+
+# Better comma and full-stop placement on long unpunctuated passages.
+deepmultilingualpunctuation==1.0.1
+
+# Research-grade speaker diarization. Needs its pipeline weights placed in the
+# app's models directory; nothing is downloaded at runtime.
+pyannote.audio==3.3.2

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      The renderer has no network access of its own: no remote fonts, no CDN,
+      no analytics. The policy below is enforced again in the main process.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http://127.0.0.1:*; media-src 'self' file: blob: http://127.0.0.1:*; connect-src 'self' http://127.0.0.1:*; font-src 'self' data:"
+    />
+    <title>SubtitleForge AI</title>
+  </head>
+  <body class="bg-panel-950 text-ink-100 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

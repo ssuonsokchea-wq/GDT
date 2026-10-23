@@ -1,0 +1,40 @@
+# Build output
+dist/
+release/
+*.tsbuildinfo
+
+# Produced or downloaded by the build, never committed
+resources/backend/
+resources/bin/
+assets/fonts/*.woff2
+assets/fonts/*.ttf
+assets/fonts/*.otf
+build/icon.ico
+build/icon.icns
+build/icon.png
+
+# Dependencies
+node_modules/
+backend/.venv/
+backend/venv/
+backend/build/
+backend/dist/
+backend/*.spec
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Local data: never commit a user's projects or a 3 GB model
+*.db
+*.db-wal
+*.db-shm
+models/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

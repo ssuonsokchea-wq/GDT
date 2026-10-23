@@ -1,0 +1,96 @@
+# Packaging configuration.
+#
+# Three things make this more than the defaults:
+#   * the frozen Python backend ships in resources/, where the main process
+#     looks for it before falling back to a system Python;
+#   * FFmpeg ships beside it, because "install FFmpeg and add it to PATH" is
+#     not an instruction a video editor's audience should ever receive;
+#   * NSIS is configured to let the user choose the install directory, since
+#     the cache and models can grow to several gigabytes.
+
+appId: ai.subtitleforge.desktop
+productName: SubtitleForge AI
+copyright: Copyright © 2026 SubtitleForge
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - package.json
+  - '!**/*.map'
+  - '!node_modules/**/{test,tests,__tests__,example,examples,docs,doc}/**'
+
+extraResources:
+  # The frozen backend. Built by `npm run backend:build` before packaging.
+  - from: resources/backend/subtitleforge-backend
+    to: backend
+    filter: ['**/*']
+  # FFmpeg and FFprobe. Place the binaries for each target platform here
+  # before packaging; see docs/PACKAGING_WINDOWS.md.
+  - from: resources/bin
+    to: bin
+    filter: ['**/*']
+  - from: assets/fonts
+    to: fonts
+    filter: ['*.ttf', '*.otf', '*.woff2']
+
+asar: true
+asarUnpack:
+  - '**/*.node'
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  artifactName: SubtitleForge-AI-Setup-${version}-${arch}.${ext}
+  publisherName: SubtitleForge
+  fileAssociations:
+    - ext: sfproj
+      name: SubtitleForge project
+      description: SubtitleForge AI project
+      icon: build/icon.ico
+      role: Editor
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: SubtitleForge AI
+  # The uninstaller leaves projects and models alone: they are the user's work
+  # and their multi-gigabyte downloads, not application files.
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  icon: build/icon.icns
+  category: public.app-category.video
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: SubtitleForge does not record audio.
+    NSCameraUsageDescription: SubtitleForge does not use the camera.
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  icon: build/icon.png
+  category: AudioVideo
+  synopsis: Offline AI subtitle generation and video captioning
+  description: >-
+    Generate, edit, style and burn subtitles into video entirely on your own
+    machine. Speech recognition runs locally with Faster-Whisper; rendering uses
+    FFmpeg and libass. No account, no upload, no network.
+
+publish: null

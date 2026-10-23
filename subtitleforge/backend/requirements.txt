@@ -1,0 +1,13 @@
+# Backend runtime. Everything here runs offline once installed.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+
+# Speech recognition. CTranslate2 is the inference engine; model weights are
+# installed separately (see docs/INSTALL.md) and never downloaded at runtime.
+faster-whisper==1.1.1
+ctranslate2==4.5.0
+numpy==2.2.1
+
+# Packaging the backend as a single executable for the Windows installer.
+pyinstaller==6.11.1
